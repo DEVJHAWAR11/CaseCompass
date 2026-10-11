@@ -25,8 +25,8 @@ import psycopg
 from dotenv import dotenv_values
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.config import ROOT  # noqa: E402
-from app.ikanoon.client import COST, IKClient, IKError  # noqa: E402
+from app.config import ROOT
+from app.ikanoon.client import COST, IKClient, IKError
 
 QUERIES = [
     "airline refund cancelled flight deficiency in service",
@@ -44,7 +44,7 @@ PAGES_PER_QUERY = 5
 TOPIC = re.compile(
     r"airline|airways|air ?india|indigo|spicejet|vistara|jet ?airways|go ?air|air ?asia|flight|"
     r"air ticket|travel|tour|makemytrip|goibibo|yatra|cleartrip|thomas cook|holiday|cruise|"
-    r"ticket|baggage|boarding", re.I)
+    r"ticket|baggage|boarding", re.IGNORECASE)
 
 
 def court_level(src: str) -> str | None:

@@ -1,5 +1,4 @@
 """Apply SQL files in backend/migrations in order (idempotent: they use IF NOT EXISTS)."""
-import sys
 from pathlib import Path
 
 import psycopg

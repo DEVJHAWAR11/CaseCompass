@@ -9,7 +9,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.ikanoon.client import IKClient, IKError  # noqa: E402
+from app.ikanoon.client import IKClient, IKError
 
 QUERIES = [
     "airline refund cancelled flight deficiency in service",
