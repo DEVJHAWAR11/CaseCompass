@@ -12,7 +12,7 @@ class Settings(BaseSettings):
     ik_base_url: str = "https://api.indiankanoon.org"
     ik_api_token: str = ""
     # Stop calling IK when our own tracked spend would pass this (INR). Free credit is 500.
-    ik_spend_cap_inr: float = 150.0
+    ik_spend_cap_inr: float = 100.0
     cache_dir: str = "data/cache"
 
     @property
