@@ -45,16 +45,20 @@ def rrf(*ranked_lists, k=RRF_K):
     return sorted(score, key=score.get, reverse=True)
 
 
-def to_cases(conn, chunk_ids: list[int], top=10):
+def to_cases(conn, chunk_ids: list[int], top=10, category: str | None = "airline_travel"):
     """Collapse ordered chunk ids to ordered unique cases, remembering the best chunk each."""
     if not chunk_ids:
         return []
     rows = conn.execute(
-        "select id,tid,section,char_start,char_end from chunks where id = any(%s)", (chunk_ids,)
+        """select ch.id,ch.tid,ch.section,ch.char_start,ch.char_end from chunks ch
+           join cases c on c.tid=ch.tid where ch.id = any(%s)
+           and (%s::text is null or c.category = %s)""", (chunk_ids, category, category)
     ).fetchall()
     info = {r[0]: r for r in rows}
     seen, out = set(), []
     for cid in chunk_ids:
+        if cid not in info:  # chunk belongs to a case outside the target category
+            continue
         _, tid, sec, s, e = info[cid]
         if tid not in seen:
             seen.add(tid)
@@ -78,12 +82,11 @@ async def search(conn, embedder: Embedder, query: str, mode="hybrid", top=10, la
         lists += [keyword(conn, q, candidates) for q in qs]
     ids = rrf(*lists) if len(lists) > 1 else [c for (c,) in lists[0]]
     if mode == "rerank":
-        ids = ids[:candidates]
-        cases = to_cases(conn, ids, top=len(ids))
+        cases = to_cases(conn, ids, top=20)  # rerank at most 20 cases
         texts = []
         for c in cases:
             full = await store.get_text(c["tid"])
-            texts.append(full[c["start"]:c["end"]])
+            texts.append(full[c["start"]:c["end"]][:1200])  # ~300 tokens each
         scores = await (reranker or NoRerank()).rerank(query, texts)
         order = sorted(range(len(cases)), key=lambda i: scores[i], reverse=True)
         return [cases[i] | {"score": scores[i]} for i in order][:top]

@@ -2,6 +2,8 @@
 (a cross-encoder) and scores them jointly, which is slower but more precise than comparing
 two precomputed vectors. NoRerank is the pass-through used as the eval baseline."""
 import asyncio
+import hashlib
+import json
 from typing import Protocol
 
 import httpx
@@ -25,11 +27,18 @@ class JinaReranker:
         self.throttle = Throttle(settings.jina_max_req_per_min, settings.jina_max_tokens_per_min)
         self.http = httpx.AsyncClient(
             headers={"Authorization": f"Bearer {settings.jina_api_key}"}, timeout=90)
+        self.cache = settings.cache_path / "jina_rerank"
+        self.cache.mkdir(parents=True, exist_ok=True)
 
     async def aclose(self):
         await self.http.aclose()
 
     async def rerank(self, query, docs):
+        key = hashlib.sha256(json.dumps([settings.rerank_model, query, docs]).encode()).hexdigest()
+        cp = self.cache / f"{key[:32]}.json"
+        if cp.exists():  # identical request seen before: free
+            log_usage("jina", settings.rerank_model, "rerank", cached=True)
+            return json.loads(cp.read_text())
         est = est_tokens(query) * len(docs) + sum(est_tokens(d) for d in docs)
         check_jina_pool(est)
         for attempt in range(5):
@@ -44,6 +53,7 @@ class JinaReranker:
                 scores = [0.0] * len(docs)
                 for x in j["results"]:
                     scores[x["index"]] = x["relevance_score"]
+                cp.write_text(json.dumps(scores))
                 return scores
             if r.status_code not in (429, 500, 502, 503, 504):
                 raise RuntimeError(f"Jina rerank HTTP {r.status_code}: {r.text[:120]}")

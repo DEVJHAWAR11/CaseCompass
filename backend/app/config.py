@@ -16,6 +16,15 @@ class Settings(BaseSettings):
     cache_dir: str = "data/cache"
     database_url: str = ""
 
+    # --- Groq LLM (OpenAI-compatible). Small model first, larger one only on failure/"unclear".
+    groq_api_key: str = ""
+    groq_base_url: str = "https://api.groq.com/openai/v1"
+    llm_small_model: str = "openai/gpt-oss-20b"
+    llm_large_model: str = "openai/gpt-oss-120b"
+    llm_daily_token_budget: int = 400_000
+    llm_min_interval_s: float = 2.2  # request throttle for the free tier's requests/min
+    llm_max_calls_per_request: int = 3
+
     # --- Jina (embeddings + rerank). Free key: non-commercial only, 10M shared token pool.
     jina_api_key: str = ""
     embed_model: str = "jina-embeddings-v3"

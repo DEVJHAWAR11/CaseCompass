@@ -1,0 +1,121 @@
+"""Outcome extraction: code first, LLM only for what code cannot read reliably.
+
+Concept: we never send a whole judgment. Code trims it to the opening facts and the final
+order (about 900 tokens), pulls cited laws with a regex, and asks a small model for a tiny
+JSON: who won, refund, compensation, is-it-travel, one-line summary. Amounts the model
+reports are checked against the text (a number that never appears in the order is dropped),
+and a result of "unclear" escalates to the larger model rather than guessing.
+"""
+import re
+
+from pydantic import BaseModel, Field, field_validator
+
+from app.chunking.chunker import chunk_judgment
+from app.llm.cascade import run_cascade
+from app.llm.provider import LLMProvider
+
+FACTS_CHARS = 1200
+ORDER_CHARS = 2400
+
+SYSTEM = (
+    "You read an Indian consumer commission judgment excerpt (facts, then final order). "
+    'Return JSON only: {"r":"allowed|partly_allowed|dismissed|unclear",'
+    '"ref":<refund INR number or null>,"comp":<compensation+costs INR number or null>,'
+    '"rel":<true if about airline/air travel/travel agent/tour/ticket refund else false>,'
+    '"s":"<one factual sentence under 40 words>"}. '
+    "Judge the COMPLAINANT's position: complaint/award in the complainant's favour = allowed "
+    "(also when the opposite party's appeal is dismissed); opposite party's appeal allowed and "
+    "complaint dismissed = dismissed. "
+    "Use null when an amount is not stated; use unclear when the outcome is not stated."
+)
+
+
+class Extracted(BaseModel):
+    r: str
+    ref: float | None = None
+    comp: float | None = None
+    rel: bool = True
+    s: str = Field(default="", max_length=400)
+
+    @field_validator("r")
+    @classmethod
+    def _enum(cls, v):
+        if v not in {"allowed", "partly_allowed", "dismissed", "unclear"}:
+            raise ValueError("bad result enum")
+        return v
+
+
+# "Section 14 of the Consumer Protection Act, 1986" / "Sections 12 & 13 of the ... Act"
+_LAW = re.compile(
+    r"[Ss]ections?\s+(\d+[A-Za-z]?(?:\(\w+\))*)(?:\s*(?:,|and|&|/)\s*\d+[A-Za-z]?)*\s+of\s+(?:the\s+)?"
+    r"((?:[A-Z][\w&.\-]*\s+){1,6}Act(?:,?\s*\d{4})?)")
+
+
+_ACT = re.compile(r"((?:[A-Z][\w&.\-]*\s+){1,6}Act(?:,?\s*\d{4})?)")
+
+
+def laws_cited(text: str, limit=8) -> list[str]:
+    """Section-level citations first ("s.15 Consumer Protection Act, 1986"), then any other
+    Acts mentioned by name. Pure regex: no LLM tokens spent on this."""
+    out: list[str] = []
+    for sec, act in _LAW.findall(text):
+        item = "s.%s %s" % (sec, re.sub(r"\s+", " ", act).strip())
+        if item not in out:
+            out.append(item)
+    named = [re.sub(r"\s+", " ", a).strip() for a in _ACT.findall(text)]
+    for a in dict.fromkeys(named):  # unique, in order of appearance
+        if not any(a in o for o in out) and not a.startswith(("The Act", "This Act")):
+            out.append(a)
+    return out[:limit]
+
+
+def trim_for_llm(text: str) -> tuple[str, bool]:
+    """Opening facts + final order only. Returns (excerpt, was_truncated)."""
+    chunks = chunk_judgment(text)
+    facts = next((c.text for c in chunks if c.section == "facts"), text[:FACTS_CHARS])
+    order = "\n".join(c.text for c in chunks if c.section == "order") or text[-ORDER_CHARS:]
+    cut = len(facts) > FACTS_CHARS or len(order) > ORDER_CHARS
+    return f"FACTS:\n{facts[:FACTS_CHARS]}\n\nORDER:\n{order[-ORDER_CHARS:]}", cut
+
+
+def _amount_in_text(x: float | None, text: str) -> bool:
+    """Guard against hallucinated money: the number must literally appear in the excerpt,
+    either as digits (1,00,000) or in lakh form (1.5 lakhs)."""
+    if x is None:
+        return True
+    if str(int(x)) in re.sub(r"[,\s]", "", text):
+        return True
+    lakhs = {float(v) for v in re.findall(r"(\d+(?:\.\d+)?)\s*lakhs?", text, re.IGNORECASE)}
+    return any(abs(v * 100000 - x) < 1 for v in lakhs)
+
+
+async def extract_case(llm: LLMProvider, text: str):
+    """Returns (Extracted | None, model_used, escalated, truncated, laws)."""
+    excerpt, cut = trim_for_llm(text)
+    obj, model, esc = await run_cascade(
+        llm, SYSTEM, excerpt, Extracted.model_validate_json, max_tokens=500, stage="extract",
+        is_unclear=lambda o: o.r == "unclear")
+    if obj:
+        if not _amount_in_text(obj.ref, excerpt):
+            obj.ref = None
+        if not _amount_in_text(obj.comp, excerpt):
+            obj.comp = None
+    return obj, model, esc, cut, laws_cited(text)
+
+
+_COMPLAINT_DISMISSED = re.compile(
+    r"complaints?\b(?:(?!against|appeal)[^.]){0,90}\b(?:is|are|stands?|shall stand|ordered to be|"
+    r"hereby)\s+(?:hereby\s+)?dismissed", re.IGNORECASE)
+_PARTLY = re.compile(r"partly allowed|partially allowed|allowed partly|allowed in part", re.IGNORECASE)
+
+
+def rule_override(text: str) -> str | None:
+    """Code check on the final order: wording that settles the outcome without the LLM.
+    Fixes the LLM's weak spot (who appealed?): "complaint ... dismissed" means the complainant
+    lost, whoever filed the appeal. Returns a result enum or None to keep the LLM's answer."""
+    tail = text[-2000:]
+    if _PARTLY.search(tail):
+        return "partly_allowed"
+    if _COMPLAINT_DISMISSED.search(tail):
+        return "dismissed"
+    return None
