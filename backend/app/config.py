@@ -14,6 +14,18 @@ class Settings(BaseSettings):
     # Stop calling IK when our own tracked spend would pass this (INR). Free credit is 500.
     ik_spend_cap_inr: float = 100.0
     cache_dir: str = "data/cache"
+    database_url: str = ""
+
+    # --- Jina (embeddings + rerank). Free key: non-commercial only, 10M shared token pool.
+    jina_api_key: str = ""
+    embed_model: str = "jina-embeddings-v3"
+    embed_dim: int = 1024
+    rerank_model: str = "jina-reranker-v2-base-multilingual"
+    jina_pool_tokens: int = 10_000_000
+    jina_warn_fraction: float = 0.70
+    jina_stop_fraction: float = 0.90
+    jina_max_req_per_min: int = 100
+    jina_max_tokens_per_min: int = 100_000
 
     @property
     def cache_path(self) -> Path:

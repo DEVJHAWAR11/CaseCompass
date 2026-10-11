@@ -1,13 +1,13 @@
 # Progress
 
 ## Current phase
-Phases 1-2 done. Awaiting go-ahead for Phase 3 (needs Jina key + model choice).
+Phase 3 done and rerank module built. BLOCKED on Groq API key (needed for Phase 4 query rewriting and Phase 5 extraction).
 
 ## Phases
 1. IK client + disk cache + ~20 test cases, data sufficiency report: DONE (see below)
 2. Schema + ingestion: DONE (152 cases ingested; `chunks` table deferred to Phase 3 until vector size is chosen)
-3. Chunking + Jina embeddings + hybrid search: not started
-4. Rerank + query rewriting: not started
+3. Chunking + Jina embeddings + hybrid search: DONE (548 chunks, 152 cases)
+4. Rerank + query rewriting: rerank DONE; rewriting needs Groq key
 5. Extraction (cascade) + citation graph: not started
 6. Eval set + script + results: not started
 7. FastAPI endpoints, rate limit, usage logging: not started
@@ -37,5 +37,12 @@ Phases 1-2 done. Awaiting go-ahead for Phase 3 (needs Jina key + model choice).
 - doctypes=consumer works. IK spend cap in config lowered to 100 INR; budget reserved for live case opens.
 - Only 152 cases: more needs another batch (about 0.2 INR/doc plus searches) after reviewing.
 
+## Phase 3 findings
+- Models chosen (delegated by user): embeddings jina-embeddings-v3, 1024 dims, 8192 tokens, task retrieval.query/passage, late_chunking confirmed (token counts differ); reranker jina-reranker-v2-base-multilingual (v3 also available, config switch). v5-text-small/nano exist (1024/768 dims) but late chunking unconfirmed, so v3 used so ablation compares chunking only.
+- Chunks store offsets + vectors + tsvector, no text. 548 chunks (facts 282, order 244, issues 22), two vectors each (standard + late).
+- Reranking needs chunk text at runtime -> fetched via IKTextStore (cached). Locally free; deployed server would pay 0.20 INR per uncached doc. OPEN DECISION: store chunk text (needs IK permission) or pre-cache.
+- Demo query: naive/hybrid/rerank all return airline cases; keyword-only is weak on long plain stories (as expected).
+- Jina: 410K tokens used (4.1% of pool).
+
 ## Usage/cost so far
-IK: ~166 live calls, 47.4 INR of 500 spent. No LLM/Jina usage.
+IK: ~166 live calls, 47.4 INR of 500 spent. Jina: ~410K tokens of 10M. No Groq usage.
