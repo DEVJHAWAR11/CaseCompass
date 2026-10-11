@@ -1,0 +1,30 @@
+# secrets
+.env
+.env.*
+!.env.example
+
+# python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.ruff_cache/
+
+# node / next
+node_modules/
+.next/
+out/
+
+# data, caches, dumps (never commit or read)
+data/
+cache/
+.cache/
+*.dump
+*.sql.gz
+eval/cache/
+
+# os / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
