@@ -1,10 +1,10 @@
 # Progress
 
 ## Current phase
-Step 0 done (scaffold). Waiting for go-ahead on Phase 1.
+Phase 1 built and probed (IK client + cache + probe script). Awaiting user review before Phase 2.
 
 ## Phases
-1. IK client + disk cache + ~20 test cases, data sufficiency report: not started
+1. IK client + disk cache + ~20 test cases, data sufficiency report: DONE (see below)
 2. Schema + ingestion: not started
 3. Chunking + Jina embeddings + hybrid search: not started
 4. Rerank + query rewriting: not started
@@ -24,5 +24,11 @@ Step 0 done (scaffold). Waiting for go-ahead on Phase 1.
 - Jina key (Phase 3), Groq key (Phase 5)
 - Has IKanoon been asked about full-text storage?
 
+## Phase 1 findings
+- Auth: `Authorization: Token <IK_API_TOKEN>` works (token in gitignored .env). Endpoints used with POST.
+- Search returns 10 docs/page; hit counts: airline refund 326, air ticket refund 907, flight cancellation compensation 374, travel agent/tour refund 120 (unfiltered, includes non-consumer noise).
+- Of 37 unique results from 4 page-0 searches: 24 State Commission, 6 NCDRC, 3 Supreme Court, 4 other. Consumer commission cases dominate, so ~300-500 is likely reachable but needs a `doctypes` filter and title-based pre-filtering.
+- Doc response keys: cites/citedby (lists), numcites, numcitedby, publishdate, docsource, doc (HTML, ~19-61K chars). Citation-graph data comes free with doc fetch.
+
 ## Usage/cost so far
-None.
+IK: 24 live calls, 6.00 INR of 500. No LLM/Jina usage.
