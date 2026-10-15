@@ -185,3 +185,38 @@ def amounts_from_order(text: str, result: str | None = None) -> tuple[float | No
         elif is_comp and not is_ref:
             comp.update(amts)
     return (max(refund) if refund else None), (sum(comp) if comp else None)
+
+
+# ---- the operative order, verbatim, for result cards ------------------------------------------
+_BOILERPLATE = re.compile(
+    r"certified cop|free of (?:cost|charge)|record room|consigned|announced|pronounced|uploaded|"
+    r"statutory requirement|heavy pendency|stipulated period|arguments .* heard|"
+    r"communicated to the parties|forwarded to|president|member|justice|^\W*\d+\W*$", re.IGNORECASE)
+_OPERATIVE = re.compile(
+    r"\b(?:dismissed|allowed|partly|partially|set aside|upheld|affirmed|modif|directed|shall pay|"
+    r"to pay|refund|disposed of|no merit|remanded|accepted)\b", re.IGNORECASE)
+ORDER_MAX_CHARS = 320
+
+
+def operative_order(text: str) -> str | None:
+    """The sentence(s) of the final order that say what the commission decided, copied exactly
+    from the judgment (no model involved), or None if nothing clear is found.
+
+    Looks at the last ~2500 characters, drops boilerplate (copies to parties, record room,
+    signatures), keeps the last two sentences that contain an operative word, and trims to
+    ~320 characters at a sentence boundary."""
+    tail = re.sub(r"\s+", " ", text[-2500:]).strip()
+    sentences = re.split(r"(?<=[.;])(?<!Rs\.)(?<!Ltd\.)(?<!Pvt\.)(?<!Plc\.)(?<!No\.)(?<!Co\.)(?<!Mr\.)(?<!Mrs\.)(?<!Dr\.)(?<!Smt\.)(?<!Sh\.)(?<!vs\.)(?<!Inc\.)(?<!Corp\.)\s+(?=[A-Z0-9(\[])", tail)
+    keep = [s.strip() for s in sentences
+            if _OPERATIVE.search(s) and not _BOILERPLATE.search(s) and 25 <= len(s) <= 600
+            and not s[0].islower()]
+    if not keep:
+        return None
+    picked = keep[-2:]
+    out = " ".join(picked)
+    while len(out) > ORDER_MAX_CHARS and len(picked) > 1:
+        picked = picked[1:]  # drop the earlier sentence first; the last one is the decision
+        out = " ".join(picked)
+    if len(out) > ORDER_MAX_CHARS:
+        out = out[:ORDER_MAX_CHARS].rsplit(" ", 1)[0] + "…"
+    return out

@@ -14,6 +14,8 @@ export interface CaseHit {
   compensation_inr: number | null;
   laws_cited: string[];
   summary_ai: string | null;
+  /** Operative sentence(s) of the final order, copied verbatim from the judgment (no model). */
+  order_excerpt: string | null;
   source_url: string;
   cited_by_count: number | null;
   matched_section: string;

@@ -5,10 +5,13 @@ import Link from "next/link";
 import { useRef } from "react";
 import { useGsap, gsap } from "@/hooks/useGsap";
 import { Magnet } from "@/components/ui/Interactive";
-import { PerchCanvas } from "@/components/birds/PerchCanvas";
+import dynamic from "next/dynamic";
 import { HERO_1 } from "@/lib/constants";
 
 /** Sunset scene; signature moment: headline rises while birds settle on the pillar. */
+// Decorative perched pigeons: loaded as a separate chunk, only when this section is rendered client-side.
+const PerchCanvas = dynamic(() => import("@/components/birds/PerchCanvas").then((m) => m.PerchCanvas), { ssr: false });
+
 export function FinalCta() {
   const root = useRef<HTMLElement>(null);
   useGsap(root, ({ reduced }) => {

@@ -113,3 +113,22 @@ def test_op_appeal_dismissed_rule():
     assert op_appeal_dismissed(awarded)
     assert not op_appeal_dismissed("The appeal is dismissed. The impugned order is upheld.")
     assert not op_appeal_dismissed("The complaint is dismissed. FDR furnished by the appellant is returned.")
+
+
+def test_operative_order_is_a_verbatim_substring_and_skips_boilerplate():
+    from app.extraction.extract import operative_order
+    text = ("Facts and discussion. We find no illegality. In the result, the appeal is dismissed "
+            "and the order of the District Forum is upheld. 15. Certified copies of this order be "
+            "sent to the parties free of charge. 16. The file be consigned to Record Room. "
+            "Pronounced. 12.05.2019. (JUSTICE A. KUMAR) PRESIDENT")
+    out = operative_order(text)
+    assert out and "dismissed" in out and "upheld" in out
+    assert "Certified" not in out and "Record Room" not in out
+    assert out.rstrip("…") in " ".join(text.split())  # copied exactly, nothing invented
+
+
+def test_operative_order_does_not_split_on_abbreviations():
+    from app.extraction.extract import operative_order
+    text = "Spicejet Ltd. and Air India Pvt. Ltd. are directed to pay Rs. 5,000/- to the complainant."
+    assert operative_order(text) == text
+    assert operative_order("No decision words here at all, only background text about a trip.") is None

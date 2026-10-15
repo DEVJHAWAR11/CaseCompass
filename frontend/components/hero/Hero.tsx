@@ -5,9 +5,12 @@ import Link from "next/link";
 import { useRef } from "react";
 import { useGsap, gsap } from "@/hooks/useGsap";
 import { useLenis } from "@/hooks/useLenis";
-import { FlockCanvas } from "@/components/birds/FlockCanvas";
+import dynamic from "next/dynamic";
 import { HERO_2, PARALLAX_STRENGTH } from "@/lib/constants";
 import { CURTAIN_DURATION } from "./Curtain";
+
+// Decorative pigeons: their own chunk, fetched after the page is interactive (never blocks first paint).
+const FlockCanvas = dynamic(() => import("@/components/birds/FlockCanvas").then((m) => m.FlockCanvas), { ssr: false });
 
 const AR = HERO_2.w / HERO_2.h;
 

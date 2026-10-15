@@ -14,6 +14,7 @@ import psycopg
 
 from app.config import settings
 from app.embeddings.jina import JinaEmbedder
+from app.extraction.extract import operative_order
 from app.graph.citation_graph import expand
 from app.ikanoon.client import IKClient, IKError
 from app.llm.provider import GroqProvider
@@ -90,6 +91,9 @@ def _enrich(conn: psycopg.Connection, hits: list[dict]) -> list[dict]:
     rows = {r[0]: r for r in conn.execute(
         """select tid,title,court,decided_on,result,refund_inr,compensation_inr,laws_cited,
                   summary,source_url,num_citedby from cases where tid = any(%s)""", (tids,))}
+    # Last ~2500 characters of each judgment, to quote the operative order verbatim (no model).
+    tails = {t: x for t, x in conn.execute(
+        "select tid, right(text, 2500) from case_texts where tid = any(%s)", (tids,))}
     out = []
     for h in hits:
         r = rows[h["tid"]]
@@ -98,7 +102,8 @@ def _enrich(conn: psycopg.Connection, hits: list[dict]) -> list[dict]:
             "result": r[4] or "unclear",
             "refund_inr": float(r[5]) if r[5] is not None else None,
             "compensation_inr": float(r[6]) if r[6] is not None else None,
-            "laws_cited": r[7] or [], "summary_ai": usable_summary(r[8]), "source_url": r[9],
+            "laws_cited": r[7] or [], "summary_ai": usable_summary(r[8]),
+            "order_excerpt": operative_order(tails.get(r[0], "")), "source_url": r[9],
             "cited_by_count": r[10], "matched_section": h["section"],
             "match_start": h.get("start"), "match_end": h.get("end"),
             "score": h.get("score")})
