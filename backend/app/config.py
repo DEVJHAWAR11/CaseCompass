@@ -15,6 +15,8 @@ class Settings(BaseSettings):
     ik_spend_cap_inr: float = 100.0
     cache_dir: str = "data/cache"
     database_url: str = ""
+    rate_limit_per_min: int = 10
+    cors_origins: str = "http://localhost:3000"
 
     # --- Groq LLM (OpenAI-compatible). Small model first, larger one only on failure/"unclear".
     groq_api_key: str = ""

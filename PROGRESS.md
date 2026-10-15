@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phases 1-6 done (eval results in eval/results.md). Next: Phase 7 FastAPI.
+Phases 1-7 done (API verified live). Next: Phase 8 Next.js UI.
 
 ## Phases
 1. IK client + disk cache + ~20 test cases, data sufficiency report: DONE (see below)
