@@ -115,14 +115,15 @@ _APPEAL_DISMISSED = re.compile(r"appeals?\b[^.]{0,80}dismiss|dismiss[^.]{0,60}ap
 # Signs that the appellant was the OPPOSITE party (the airline/agent): it furnished a bank
 # guarantee/FDR or statutory deposit, or the order names the appellant as opposite party.
 _OP_APPELLANT = re.compile(
-    r"bank guarantee|\bFDR\b|statutory deposit|appellants?\s*/\s*(?:opposite|O\.?P)|"
-    r"opposite part(?:y|ies)\s*/\s*appellants?|appellants?[^.]{0,25}opposite part", re.IGNORECASE)
+    r"bank guarantee|\bFDR\b|statutory (?:deposit|amount)|deposited (?:by the appellant )?at the time of filing|"
+    r"appellants?\s*/\s*(?:opposite|O\.?P)|opposite part(?:y|ies)\s*/\s*appellants?|"
+    r"appellants?[^.]{0,25}opposite part", re.IGNORECASE)
 
 
 def op_appeal_dismissed(text: str) -> bool:
     """True when the final order dismisses an appeal that the opposite party (not the
     complainant) filed: the complainant's award then stands, so the result is 'allowed'."""
-    tail = text[-1800:]
+    tail = text[-3500:]
     return bool(_APPEAL_DISMISSED.search(tail) and _OP_APPELLANT.search(tail)
                 and not _COMPLAINT_DISMISSED.search(tail))
 

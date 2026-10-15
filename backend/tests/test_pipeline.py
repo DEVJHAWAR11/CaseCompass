@@ -104,3 +104,12 @@ def test_weak_summaries_are_dropped_good_ones_kept():
     assert usable_summary(None) is None
     good = "The commission directed Spicejet to pay Rs 23,000 compensation for lost baggage."
     assert usable_summary(good) == good
+
+
+def test_op_appeal_dismissed_rule():
+    from app.extraction.extract import op_appeal_dismissed
+    awarded = ("We find no merit and dismiss the appeal. The payment shall be made within one "
+               "month. Bank Guarantee/FDR, if any, furnished by the appellant be returned forthwith.")
+    assert op_appeal_dismissed(awarded)
+    assert not op_appeal_dismissed("The appeal is dismissed. The impugned order is upheld.")
+    assert not op_appeal_dismissed("The complaint is dismissed. FDR furnished by the appellant is returned.")

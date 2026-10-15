@@ -46,9 +46,12 @@ ablations are in [`eval/results.md`](eval/results.md).
 
 What did not help, reported honestly: reranking on our derived text did not beat plain hybrid, so it
 is off by default; graph expansion lowered nDCG, so it is shown separately as "related cases". Late
-chunking, combined with rewriting, was better on every metric and is the shipped default. Outcome labels: on a 50-case sample (42 judgeable) reviewed by Claude, not a human, 76% were correct;
-after fixes made from that review, 81% on the same sample (optimistic, since the fixes were tuned
-on it). A fresh sample is still to do. Details: `eval/review_results.md`.
+chunking, combined with rewriting, was better on every metric and is the shipped default. Outcome labels were checked by Claude (not a human) against the end of each judgment. On a fresh,
+random 50-case sample (35 judgeable) the AI label was right 71% of the time (95% interval 55-84%),
+measured before the last rule fix. The main error is the model answering "unclear" when the airline's
+appeal was dismissed (the award stands); a code rule now fixes most of these, which lifted the same
+samples to 77-81%, but that number is in-sample. Amounts are less reliable than outcomes. Details:
+`eval/review_results*.md`.
 
 ## Run locally
 
