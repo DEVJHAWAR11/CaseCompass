@@ -1,7 +1,9 @@
-# Draft email to Indian Kanoon (optional)
+# Draft email to Indian Kanoon
 
-Only needed if you want to store judgment text. CaseCompass works without it (it stores only
-its own derived data and fetches text live on request).
+Two requests in one email: (1) non-commercial verification, because the pricing page says
+non-commercial projects get Rs 10,000 free credit each month after the site administrator
+verifies the use case; (2) whether storing text is acceptable. CaseCompass works without (2)
+(it stores only its own derived data and fetches text live on request).
 
 Where to send it: use the contact details on https://indiankanoon.org/ (footer / API pages)
 or reply to the email address you signed up for the API with. Do not guess an address.
@@ -17,7 +19,9 @@ CaseCompass using the Indian Kanoon API (account email: devjhawar11.work@gmail.c
 people describe a consumer dispute in plain words and see how similar NCDRC and state commission
 cases were decided, with a link to every judgment on Indian Kanoon.
 
-I have read the API terms and want to stay within them. They do not say whether API users may
+Your pricing page says non-commercial projects can receive free monthly credit after verification. CaseCompass is non-commercial (a portfolio/learning project, no ads, no payments), so I would like to request that verification, and tell you whatever else you need to confirm the use case.
+
+Separately, I have read the API terms and want to stay within them. They do not say whether API users may
 store the text of documents they fetch, so I'd like to ask before doing anything beyond what is
 clearly allowed.
 
