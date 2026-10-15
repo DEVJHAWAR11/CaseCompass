@@ -95,3 +95,12 @@ def test_amounts_from_order_ignores_dismissed_and_claims():
     text = "The complainant claimed Rs.35.00 lakhs as compensation. It is dismissed with cost of Rs.5000/-."
     assert amounts_from_order(text, "dismissed") == (None, None)
     assert amounts_from_order(text, "allowed")[1] != 3500000.0
+
+
+def test_weak_summaries_are_dropped_good_ones_kept():
+    from app.retrieval.pipeline import usable_summary
+    assert usable_summary("The judgment excerpt provides no details on any refund.") is None
+    assert usable_summary("The appeal was partly accepted, but the judgment does not specify any amount.") is None
+    assert usable_summary(None) is None
+    good = "The commission directed Spicejet to pay Rs 23,000 compensation for lost baggage."
+    assert usable_summary(good) == good

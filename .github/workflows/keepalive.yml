@@ -1,0 +1,20 @@
+# Pings the Render backend every 14 minutes so the free instance (which sleeps after ~15 minutes
+# idle) stays awake. GitHub's scheduler is best effort and can run a few minutes late, so a
+# visitor may still occasionally hit a cold start; the UI already shows "waking up" for that.
+# Free-tier note: one always-on service uses ~744 of Render's 750 free instance hours per month.
+name: keep backend awake
+
+on:
+  schedule:
+    - cron: "*/14 * * * *"
+  workflow_dispatch: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Call /health (retry once, a cold start can take ~50 s)
+        run: |
+          curl -fsS --max-time 90 --retry 2 --retry-delay 5 \
+            https://casecompass-qw3v.onrender.com/health

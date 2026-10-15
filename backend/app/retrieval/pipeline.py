@@ -13,7 +13,6 @@ from dataclasses import dataclass
 import psycopg
 
 from app.config import settings
-
 from app.embeddings.jina import JinaEmbedder
 from app.graph.citation_graph import expand
 from app.ikanoon.client import IKClient, IKError
@@ -71,6 +70,21 @@ def summary_line(stats: dict) -> str:
     return s
 
 
+# AI summaries that only say the model could not read the outcome are noise on a card, so they
+# are dropped at serve time (the case still shows its result label and the judgment link).
+_WEAK_SUMMARY = re.compile(
+    r"provides? no|does not (?:state|specify|mention|provide|contain|include)|"
+    r"no (?:details|information|mention)|not (?:stated|specified|provided|clear)|"
+    r"\bexcerpt\b|cannot (?:be )?determin|insufficient", re.IGNORECASE)
+
+
+def usable_summary(summary: str | None) -> str | None:
+    """The stored one-line summary, or None when it is empty or only says details are missing."""
+    if not summary or _WEAK_SUMMARY.search(summary):
+        return None
+    return summary
+
+
 def _enrich(conn: psycopg.Connection, hits: list[dict]) -> list[dict]:
     tids = [h["tid"] for h in hits]
     rows = {r[0]: r for r in conn.execute(
@@ -84,7 +98,7 @@ def _enrich(conn: psycopg.Connection, hits: list[dict]) -> list[dict]:
             "result": r[4] or "unclear",
             "refund_inr": float(r[5]) if r[5] is not None else None,
             "compensation_inr": float(r[6]) if r[6] is not None else None,
-            "laws_cited": r[7] or [], "summary_ai": r[8], "source_url": r[9],
+            "laws_cited": r[7] or [], "summary_ai": usable_summary(r[8]), "source_url": r[9],
             "cited_by_count": r[10], "matched_section": h["section"],
             "match_start": h.get("start"), "match_end": h.get("end"),
             "score": h.get("score")})
