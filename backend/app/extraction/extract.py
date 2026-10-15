@@ -119,3 +119,48 @@ def rule_override(text: str) -> str | None:
     if _COMPLAINT_DISMISSED.search(tail):
         return "dismissed"
     return None
+
+
+# ---- amounts read by code from the final order (no LLM) ------------------------------------
+_AMT = re.compile(
+    r"(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d+)?)\s*(lakhs?|lacs?|/-)?|"
+    r"([\d,]+(?:\.\d+)?)\s*(lakhs?|lacs?)\b", re.IGNORECASE)
+_REFUND_WORDS = re.compile(r"refund|ticket (?:amount|price|cost)|fare|amount paid|paid by the complainant",
+                           re.IGNORECASE)
+_COMP_WORDS = re.compile(r"compensat|damages|mental|agony|harass|litigation|costs?\b|deficiency",
+                         re.IGNORECASE)
+
+
+def _to_inr(num: str, unit: str | None) -> float | None:
+    try:
+        v = float(num.replace(",", ""))
+    except ValueError:
+        return None
+    if unit and unit.lower().startswith(("lakh", "lac")):
+        v *= 100000
+    return v if v >= 100 else None  # ignore stray small numbers (section numbers, percents)
+
+
+def amounts_from_order(text: str, result: str | None = None) -> tuple[float | None, float | None]:
+    """(refund, compensation) the commission ORDERED, read by pattern, or None.
+
+    Conservative on purpose (first version double counted amounts from the discussion and
+    from the lower forum's order). Rules: only for allowed/partly_allowed outcomes; only the
+    last ~1500 characters; only sentences with an ordering verb (directed, shall pay, allow,
+    ordered); each distinct amount counted once; sentences about refund/fare feed the refund,
+    those about compensation/damages/costs feed compensation; mixed sentences are skipped."""
+    if result in ("dismissed", "unclear"):
+        return None, None
+    tail = text[-1500:]
+    refund, comp = set(), set()
+    for sent in re.split(r"(?<=[.;])\s+(?=[A-Z0-9(])", tail):
+        if not re.search(r"direct|shall pay|to pay|pay|ordered|allow", sent, re.IGNORECASE):
+            continue
+        amts = [a for m in _AMT.finditer(sent)
+                if (a := _to_inr(m.group(1) or m.group(3), m.group(2) or m.group(4)))]
+        is_ref, is_comp = bool(_REFUND_WORDS.search(sent)), bool(_COMP_WORDS.search(sent))
+        if is_ref and not is_comp:
+            refund.update(amts[:1])
+        elif is_comp and not is_ref:
+            comp.update(amts)
+    return (max(refund) if refund else None), (sum(comp) if comp else None)

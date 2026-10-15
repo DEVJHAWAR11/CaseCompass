@@ -80,3 +80,18 @@ def test_db_text_store_falls_back_to_live_and_saves(monkeypatch):
     assert saved == {7: "live text"}
     store.live = None  # second read must come from storage, never from IK
     assert asyncio.run(store.get_text(7)) == "live text"
+
+
+def test_amounts_from_order_counts_ordered_sums_once():
+    from app.extraction.extract import amounts_from_order
+    order = ("The opposite parties are directed to pay a compensation of Rs.40,000/- to the "
+             "complainant with interest @9% p.a. The amount of Rs.40,000/- shall carry interest. "
+             "They shall also pay Rs.10,000/- towards costs.")
+    assert amounts_from_order(order, "partly_allowed") == (None, 50000.0)
+
+
+def test_amounts_from_order_ignores_dismissed_and_claims():
+    from app.extraction.extract import amounts_from_order
+    text = "The complainant claimed Rs.35.00 lakhs as compensation. It is dismissed with cost of Rs.5000/-."
+    assert amounts_from_order(text, "dismissed") == (None, None)
+    assert amounts_from_order(text, "allowed")[1] != 3500000.0
