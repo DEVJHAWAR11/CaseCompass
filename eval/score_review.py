@@ -1,16 +1,19 @@
 """Score the hand-checked accuracy sheet and write aggregate numbers to eval/review_results.md.
 
-Usage:  backend/.venv/Scripts/python eval/score_review.py
+Usage:  backend/.venv/Scripts/python eval/score_review.py [sheet.csv [output.md]]
 Reads data/review/accuracy_sheet.csv (rows where `correct_result` is filled in with one of
 allowed / partly_allowed / dismissed / unclear). Only aggregates are written, no judgment text.
 """
 import csv
 import math
+import sys
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SHEET = ROOT / "data" / "review" / "accuracy_sheet.csv"
+# Optional first argument: another sheet file name inside data/review/ (e.g. the after-rules copy).
+SHEET = ROOT / "data" / "review" / (sys.argv[1] if len(sys.argv) > 1 else "accuracy_sheet.csv")
+OUT = ROOT / "eval" / (sys.argv[2] if len(sys.argv) > 2 else "review_results.md")
 CLASSES = ["allowed", "partly_allowed", "dismissed", "unclear"]
 
 
@@ -40,7 +43,7 @@ def main():
     conf = Counter((r["correct_result"].strip(), r["ai_result"]) for r in rows)
     right = sum(v for (t, a), v in conf.items() if t == a)
     lo, hi = wilson(right, n)
-    out = [f"# Outcome label accuracy (hand-checked, n={n})\n",
+    out = [f"# Outcome label accuracy (reviewed by Claude from the last 900 characters of each judgment, n={n})\n",
            f"Overall: {right}/{n} = {right / n:.0%} (95% interval {lo:.0%}-{hi:.0%}).\n",
            "| class | AI said (precision) | actually (recall) |", "|---|---|---|"]
     for c in CLASSES:
@@ -53,11 +56,13 @@ def main():
     for t in CLASSES:
         out.append(f"| {t} | " + " | ".join(str(conf[(t, a)]) for a in CLASSES) + " |")
     for col, ai in (("correct_refund_inr", "ai_refund_inr"), ("correct_compensation_inr", "ai_compensation_inr")):
-        checked = [r for r in rows if r[col].strip() or r[ai].strip()]
-        ok = sum(1 for r in checked if num(r[col]) == num(r[ai]))
-        out.append(f"\n{ai}: {ok}/{len(checked)} correct among rows where either side has a value "
-                   "(blank true value = no amount in the order).")
-    (ROOT / "eval" / "review_results.md").write_text("\n".join(out) + "\n", encoding="utf-8")
+        # Only rows where the reviewer recorded a verified true amount ("none" = no amount).
+        # Blank = not verified, skipped, so this measures amount accuracy where an amount is known.
+        checked = [r for r in rows if r[col].strip()]
+        ok = sum(1 for r in checked
+                 if num(r[ai]) == (None if r[col].strip().lower() == "none" else num(r[col])))
+        out.append(f"\n{ai}: {ok}/{len(checked)} match among rows with a verified true amount.")
+    OUT.write_text("\n".join(out) + "\n", encoding="utf-8")
     print("\n".join(out))
 
 

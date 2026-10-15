@@ -111,6 +111,22 @@ _COMPLAINT_DISMISSED = re.compile(
 _PARTLY = re.compile(r"partly allowed|partially allowed|allowed partly|allowed in part", re.IGNORECASE)
 
 
+_APPEAL_DISMISSED = re.compile(r"appeals?\b[^.]{0,80}dismiss|dismiss[^.]{0,60}appeals?\b", re.IGNORECASE)
+# Signs that the appellant was the OPPOSITE party (the airline/agent): it furnished a bank
+# guarantee/FDR or statutory deposit, or the order names the appellant as opposite party.
+_OP_APPELLANT = re.compile(
+    r"bank guarantee|\bFDR\b|statutory deposit|appellants?\s*/\s*(?:opposite|O\.?P)|"
+    r"opposite part(?:y|ies)\s*/\s*appellants?|appellants?[^.]{0,25}opposite part", re.IGNORECASE)
+
+
+def op_appeal_dismissed(text: str) -> bool:
+    """True when the final order dismisses an appeal that the opposite party (not the
+    complainant) filed: the complainant's award then stands, so the result is 'allowed'."""
+    tail = text[-1800:]
+    return bool(_APPEAL_DISMISSED.search(tail) and _OP_APPELLANT.search(tail)
+                and not _COMPLAINT_DISMISSED.search(tail))
+
+
 def rule_override(text: str) -> str | None:
     """Code check on the final order: wording that settles the outcome without the LLM.
     Fixes the LLM's weak spot (who appealed?): "complaint ... dismissed" means the complainant
@@ -125,7 +141,7 @@ def rule_override(text: str) -> str | None:
 
 # ---- amounts read by code from the final order (no LLM) ------------------------------------
 _AMT = re.compile(
-    r"(?:Rs\.?|INR|₹)\s*([\d,]+(?:\.\d+)?)\s*(lakhs?|lacs?|/-)?|"
+    r"(?:Rs\.?|INR|₹|`)\s*([\d,]+(?:\.\d+)?)\s*(lakhs?|lacs?|/-)?|"
     r"([\d,]+(?:\.\d+)?)\s*(lakhs?|lacs?)\b", re.IGNORECASE)
 _REFUND_WORDS = re.compile(r"refund|ticket (?:amount|price|cost)|fare|amount paid|paid by the complainant",
                            re.IGNORECASE)
@@ -155,8 +171,10 @@ def amounts_from_order(text: str, result: str | None = None) -> tuple[float | No
         return None, None
     tail = text[-1500:]
     refund, comp = set(), set()
-    for sent in re.split(r"(?<=[.;])\s+(?=[A-Z0-9(])", tail):
-        if not re.search(r"direct|shall pay|to pay|pay|ordered|allow", sent, re.IGNORECASE):
+    for sent in re.split(r"(?<=[.;])(?<!Rs\.)\s+(?=[A-Z0-9(])", tail):
+        if re.search(r"enhanc|reduc|instead of|in place of", sent, re.IGNORECASE):
+            continue  # recital of a change to the lower forum's sum, not the sum ordered
+        if not re.search(r"direct|shall pay|to pay|pay|ordered|allow|deem|award|lump ?sum", sent, re.IGNORECASE):
             continue
         amts = [a for m in _AMT.finditer(sent)
                 if (a := _to_inr(m.group(1) or m.group(3), m.group(2) or m.group(4)))]

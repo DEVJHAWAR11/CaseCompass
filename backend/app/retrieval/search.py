@@ -25,7 +25,8 @@ def _vec(v):
 def dense(conn: psycopg.Connection, qvec, n=30, late=False):
     col = "emb_late" if late else "emb"
     return conn.execute(
-        f"select id from chunks order by {col} <=> %s::vector limit %s", (_vec(qvec), n)
+        f"select id from chunks where tid in (select tid from cases where status='ingested') "
+        f"order by {col} <=> %s::vector limit %s", (_vec(qvec), n)
     ).fetchall()
 
 
@@ -34,7 +35,8 @@ def keyword(conn: psycopg.Connection, query: str, n=30):
     words = " or ".join(w for w in query.replace('"', " ").split() if len(w) > 2)
     return conn.execute(
         """select id from chunks, websearch_to_tsquery('english', %s) q
-           where tsv @@ q order by ts_rank_cd(tsv, q) desc limit %s""", (words, n)).fetchall()
+           where tsv @@ q and tid in (select tid from cases where status='ingested')
+           order by ts_rank_cd(tsv, q) desc limit %s""", (words, n)).fetchall()
 
 
 def rrf(*ranked_lists, k=RRF_K):
