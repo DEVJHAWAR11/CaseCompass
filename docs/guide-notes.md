@@ -93,3 +93,4 @@ Keep this current. Every number here comes from a real run; mistakes are recorde
 - Eval re-run on 225 cases: hit@5 0.96, MRR 0.93 and nDCG 0.65 with hybrid + rewriting; reranker on derived text still not helpful (nDCG 0.62 vs 0.64). recall@10 fell only because labels per story grew. Late chunking again scores the best nDCG (0.68-0.70).
 - IKanoon logo: shown once, in a highlighted box above search results (owner decision); About keeps the text credit.
 - Deployment files added: backend/Dockerfile, render.yaml (free web service, secrets via dashboard, IK_SPEND_CAP_INR=0 in production).
+- Retrieval default switched to hybrid + rewriting on late-chunking vectors (USE_LATE_CHUNKING=true): nDCG 0.69 vs 0.66, hit@5 1.00 vs 0.96. Standard vectors kept for the ablation.

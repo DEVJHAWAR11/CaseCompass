@@ -64,6 +64,11 @@ async def v_hybrid_rewrite(env, s):
     return await env.run(s, "hybrid", queries=await rewrite_query(env.llm, s))
 
 
+async def v_hybrid_rewrite_late(env, s):
+    """Same as the shipped default but searching the late-chunking vectors."""
+    return await env.run(s, "hybrid", late=True, queries=await rewrite_query(env.llm, s))
+
+
 async def v_hyde(env, s):
     return await env.run(s, "rerank", queries=await rewrite_query(env.llm, s, hyde=True))
 
@@ -91,5 +96,6 @@ ABLATIONS = [
     ("hybrid + rerank on derived text (= stage 3, shipped)", v_rerank),
     ("hybrid + rerank on matched passage (needs live IK fetch)", v_rerank_passage),
     ("hybrid + rewriting, no rerank (shipped default)", v_hybrid_rewrite),
+    ("hybrid + rewriting, late chunking", v_hybrid_rewrite_late),
     ("rewriting via HyDE instead", v_hyde),
 ]

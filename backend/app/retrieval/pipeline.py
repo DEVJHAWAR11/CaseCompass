@@ -106,7 +106,7 @@ async def run_search(sv: Services, conn: psycopg.Connection, story: str, mode: s
             notices.append("Query rewriting was unavailable; searched with your original words.")
     try:
         hits = await search(conn, sv.emb, story, mode=effective, top=top, reranker=sv.rr,
-                            store=sv.store, queries=queries)
+                            store=sv.store, queries=queries, late=settings.use_late_chunking)
     except (JinaPoolExhausted, RuntimeError, IKError) as e:
         # Embedding/rerank service unavailable: keyword-only fallback, with a notice.
         notices.append("Smart search is temporarily unavailable, so this result uses basic "

@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     # Reranking is OFF by default: in our eval it did not beat plain hybrid search, and it needs
     # either live judgment text (IK credit) or hurts quality when run on our derived text.
     rerank_enabled: bool = False
+    # Search the late-chunking vectors (emb_late). Won the eval on every metric; see eval/results.md.
+    use_late_chunking: bool = True
     # Keep cleaned judgment text in our database (table case_texts). See migrations/004.
     store_text: bool = True
     cors_origins: str = "http://localhost:3000"

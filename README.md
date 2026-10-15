@@ -40,13 +40,13 @@ ablations are in [`eval/results.md`](eval/results.md).
 | naive vector search | 0.96 | 0.65 | 0.87 | 0.64 |
 | + hybrid (RRF) | 0.96 | 0.69 | 0.89 | 0.64 |
 | + Jina rerank (derived text) | 0.96 | 0.66 | 0.89 | 0.62 |
-| + query rewriting (shipped, no rerank) | 0.96 | 0.69 | 0.93 | 0.65 |
+| + query rewriting (no rerank) | 0.96 | 0.69 | 0.93 | 0.65 |
 | + citation-graph expansion | 0.96 | 0.69 | 0.93 | 0.60 |
-| hybrid, late chunking | 1.00 | 0.72 | 0.88 | 0.68 |
+| hybrid + rewriting + late chunking (shipped) | 1.00 | 0.73 | 0.91 | 0.69 |
 
 What did not help, reported honestly: reranking on our derived text did not beat plain hybrid, so it
 is off by default; graph expansion lowered nDCG, so it is shown separately as "related cases". Late
-chunking gave the best nDCG and is the next candidate for the default. Outcome labels were about 70%
+chunking, combined with rewriting, was better on every metric and is the shipped default. Outcome labels were about 70%
 correct on a 50-case spot check made before a rule fix; a fresh review is still to do.
 
 ## Run locally
