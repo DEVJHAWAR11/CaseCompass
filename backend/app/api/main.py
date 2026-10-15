@@ -89,6 +89,13 @@ class SearchRequest(BaseModel):
     top: int = Field(default=10, ge=1, le=10)
 
 
+@app.get("/_debug_ip")  # TEMPORARY: remove after checking which header carries the real client IP
+def debug_ip(request: Request):
+    keep = ("x-forwarded-for", "cf-connecting-ip", "true-client-ip", "x-real-ip", "forwarded")
+    return {"headers": {k: v for k, v in request.headers.items() if k in keep},
+            "peer": request.client.host if request.client else None}
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
