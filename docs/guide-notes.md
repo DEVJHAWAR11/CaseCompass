@@ -53,3 +53,13 @@ Keep this current. Every number here comes from a real run; mistakes are recorde
 - Error states: rate limited (429), server error, unreachable, waking-up message after 4s, API notices (Jina fallback, rewriting unavailable, passages unavailable).
 - IKanoon logo: component expects the official file at frontend/public/ikanoon-logo.png (unaltered); text credit shows until it is added. Not downloaded by me: needs the owner to supply it.
 - Verified in the browser pane: compare view rendered 3 columns with different summaries for the baggage story (naive 7/10 favoured, hybrid 7/10, full 9/10); drawer works; mobile width works.
+
+## Landing page (Phase 8b)
+- Route / is a scroll-story landing page; the search tool moved to /search (restyled to the same parchment palette).
+- Stack added: gsap 3.15 (ScrollTrigger) + lenis 1.3 (smooth scroll driven by gsap.ticker). React Bits-style pieces (CountUp, Magnet, SpotlightCard, TiltCard, line-by-line headline reveal) were written in-repo instead of copied, to share one GSAP setup; Framer Motion not used (saves weight).
+- Hero depth is faked from one flat painting: the same image stacked 3x, each masked to a depth band and moved at its own speed (mouse max 12px, scroll scrub); the scales get a ±1.5° sway via a 4th masked copy. Phones get one flat copy only.
+- Birds: canvas boids (separation/alignment/cohesion + wind + cursor avoidance + scroll lift), 18 desktop / 7 phone; final CTA birds land on perch points mapped through object-fit cover math.
+- Reduced motion: no curtain, no birds, no pins, content fully visible. QA override: add ?motion=force to the URL.
+- Lighthouse (production build, local): desktop performance 98, accessibility 96, best practices 96, SEO 100, LCP 0.9s, CLS 0. Mobile (simulated slow 4G) performance 84-87, LCP 3.9-4.2s. Mobile started at 75; fixes: dropped Source Serif font, fewer font weights, no curtain on phones, single art layer on phones.
+- Honest content choices: problem-section counters use our real corpus numbers (152 judgments, 851 citation links, 548 passages), not unverified national statistics; the trust section shows our own commitments, not invented testimonials; demo cards are real cases from the index with AI-extracted outcomes, labelled as such.
+- IKanoon logo: still a text credit until the official file is placed at frontend/public/ikanoon-logo.png.

@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Disclaimer, IKanoonLogo } from "@/components/Attribution";
 
 export const metadata = { title: "About CaseCompass" };
@@ -5,23 +6,23 @@ export const metadata = { title: "About CaseCompass" };
 export default function About() {
   return (
     <main className="mx-auto max-w-2xl space-y-5 px-4 py-10">
-      <a href="/" className="text-sm underline">
+      <Link href="/" className="font-ui text-sm underline">
         ← Back
-      </a>
-      <h1 className="text-2xl font-semibold">About CaseCompass</h1>
+      </Link>
+      <h1 className="font-display text-4xl tracking-tight">About CaseCompass</h1>
       <p>
         CaseCompass helps people see how Indian consumer commissions (NCDRC and state commissions)
         decided disputes similar to theirs. It never predicts whether you will win; it only shows what
         similar cases decided, with links to the source judgments.
       </p>
-      <h2 className="text-lg font-semibold">Data source</h2>
+      <h2 className="font-display text-2xl">Data source</h2>
       <p>
         Case text and citations come from the Indian Kanoon API (indiankanoon.org). The data is
         published as-is from government sources with no accuracy warranty. CaseCompass is an
         independent project and is not endorsed by, or affiliated with, Indian Kanoon.
       </p>
       <IKanoonLogo />
-      <h2 className="text-lg font-semibold">How the outcomes are produced</h2>
+      <h2 className="font-display text-2xl">How the outcomes are produced</h2>
       <p>
         Outcome labels, amounts and one-line summaries are AI-generated from the opening facts and the
         final order of each judgment, then checked by simple code rules. They can be wrong or

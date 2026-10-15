@@ -1,26 +1,192 @@
 @import "tailwindcss";
 
+/* ------------------------------------------------------------------------------------------
+   Design tokens. Tailwind v4 reads tokens from @theme (it replaces tailwind.config.js), so
+   `bg-parchment`, `text-ink`, `font-display` etc. are generated from these variables.
+   ------------------------------------------------------------------------------------------ */
+@theme {
+  --color-parchment: #f6ead0;
+  --color-parchment-deep: #e9d3a6;
+  --color-saffron: #e8a33d;
+  --color-terracotta: #b5523b;
+  --color-sandstone: #d9a87a;
+  --color-brass: #b8893b;
+  --color-dusk-indigo: #8e93c4;
+  --color-ashoka-navy: #1f2a5c;
+  --color-ink: #2e2118;
+  --color-ink-soft: #5a4636; /* AA on parchment for small text */
+  --color-sage: #7c8b5a;
+
+  --font-display: var(--font-cormorant), "Cormorant Garamond", Georgia, serif;
+  --font-deva: var(--font-tiro), "Tiro Devanagari Hindi", serif;
+  --font-body: var(--font-hind), "Hind", system-ui, sans-serif;
+  --font-ui: var(--font-hind), "Hind", system-ui, sans-serif;
+
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --grain-opacity: 0.06; /* tweakable: paper grain strength */
+  color-scheme: light;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  background: var(--color-parchment);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  overflow-x: clip; /* decorative bleeds (rollers, scaled art) never cause sideways scroll */
+  background: var(--color-parchment);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-saffron) 45%, transparent);
+  color: var(--color-ink);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-ashoka-navy);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* Lenis recommended styles */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+
+/* Full-page paper grain (SVG feTurbulence, inlined so there is no extra request) */
+.paper-grain {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.18 0 0 0 0 0.13 0 0 0 0 0.09 0 0 0 1.4 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+.vignette {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 59;
+  background: radial-gradient(ellipse at center, transparent 60%, rgb(46 33 24 / 0.16) 100%);
+}
+
+/* Parchment scrap card with deckled (torn) edges */
+.deckled {
+  background:
+    radial-gradient(120% 90% at 30% 10%, #fbf3e0 0%, var(--color-parchment) 55%, var(--color-parchment-deep) 100%);
+  box-shadow:
+    0 1px 0 rgb(255 255 255 / 0.6) inset,
+    0 14px 30px -18px rgb(46 33 24 / 0.55),
+    0 2px 6px -2px rgb(46 33 24 / 0.25);
+  clip-path: polygon(
+    0% 2%, 4% 0%, 9% 1.5%, 15% 0.2%, 22% 1.2%, 30% 0%, 38% 1.4%, 46% 0.3%, 55% 1.3%, 63% 0%,
+    71% 1.1%, 79% 0.2%, 87% 1.5%, 94% 0.1%, 100% 1.8%, 99.2% 10%, 100% 22%, 99.1% 35%, 100% 50%,
+    99.3% 64%, 100% 78%, 99.2% 90%, 100% 98%, 95% 100%, 88% 98.7%, 80% 100%, 72% 98.9%, 63% 100%,
+    55% 98.6%, 46% 100%, 37% 98.8%, 28% 100%, 20% 98.7%, 12% 100%, 5% 98.8%, 0% 100%, 0.8% 88%,
+    0% 75%, 0.9% 61%, 0% 47%, 0.7% 33%, 0% 20%, 0.8% 9%
+  );
+}
+
+/* Thin brass hairline */
+.brass-line {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--color-brass) 15%, var(--color-brass) 85%, transparent);
+}
+
+/* Brass/saffron pill with an inner glow */
+.btn-brass {
+  background: linear-gradient(180deg, #f0b955 0%, var(--color-saffron) 45%, #c98a2c 100%);
+  color: var(--color-ink);
+  box-shadow:
+    inset 0 1px 0 rgb(255 245 220 / 0.85),
+    inset 0 -2px 6px rgb(120 70 10 / 0.35),
+    0 8px 20px -10px rgb(140 80 20 / 0.7);
+}
+.btn-brass:hover {
+  box-shadow:
+    inset 0 1px 0 rgb(255 245 220 / 0.9),
+    inset 0 0 18px rgb(255 230 170 / 0.75),
+    0 12px 26px -10px rgb(140 80 20 / 0.8);
+}
+.btn-ghost {
+  border: 1px solid var(--color-brass);
+  color: var(--color-ink);
+  background: rgb(246 234 208 / 0.55);
+  backdrop-filter: blur(2px);
+}
+.btn-ghost:hover {
+  background: rgb(246 234 208 / 0.9);
+}
+
+/* If JavaScript never runs, the intro curtain still gets out of the way. */
+@keyframes curtain-failsafe {
+  to {
+    visibility: hidden;
+  }
+}
+.curtain-failsafe {
+  animation: curtain-failsafe 0s 2.6s forwards;
+}
+
+/* Heritage marquee */
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+.marquee-track {
+  animation: marquee 60s linear infinite;
+}
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.spin-slow {
+  animation: spin-slow 40s linear infinite;
+}
+
+/* Typing caret for the live demo */
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+.caret::after {
+  content: "";
+  display: inline-block;
+  width: 2px;
+  height: 1.1em;
+  margin-left: 2px;
+  vertical-align: -0.15em;
+  background: var(--color-ink);
+  animation: caret 1s steps(1) infinite;
+}
+
+/* Hide the native cursor only when our brass cursor is active (fine pointers) */
+html.has-brass-cursor,
+html.has-brass-cursor * {
+  cursor: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track,
+  .spin-slow,
+  .caret::after {
+    animation: none !important;
+  }
 }

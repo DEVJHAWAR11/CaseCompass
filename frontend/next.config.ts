@@ -1,7 +1,6 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
   turbopack: {
@@ -11,6 +10,11 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
+  },
+  images: {
+    // Serve AVIF first, WebP as fallback; one quality level keeps the optimizer cache small.
+    formats: ["image/avif", "image/webp"],
+    qualities: [75],
   },
 };
 
