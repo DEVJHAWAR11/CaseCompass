@@ -47,3 +47,9 @@ Keep this current. Every number here comes from a real run; mistakes are recorde
 - Decision: summary sentence is a code template, not LLM-phrased (cannot invent facts, saves quota). Graph expansion is shown as a separate related_cases list, not mixed into ranking, because the eval showed mixing it in lowers nDCG.
 - Fallbacks: Jina exhausted/unreachable -> keyword-only + notice; LLM unavailable -> no rewriting + notice; IK unreachable -> passages omitted + notice.
 - Jina tokens used so far: 982,914 (9.8% of pool); Groq last 24h: 87,598 tokens.
+
+## Frontend (Phase 8)
+- Next.js 16 (App Router) + TypeScript + Tailwind 4. One page: big text box, 4 view buttons (Full pipeline / Hybrid / Naive / Compare all = 3 parallel requests side by side), result cards (outcome badge, refund, compensation, laws, AI-generated label, source link), Why-this-result drawer (matched passage), related-cases accordion, disclaimer, /about page with data-source credit.
+- Error states: rate limited (429), server error, unreachable, waking-up message after 4s, API notices (Jina fallback, rewriting unavailable, passages unavailable).
+- IKanoon logo: component expects the official file at frontend/public/ikanoon-logo.png (unaltered); text credit shows until it is added. Not downloaded by me: needs the owner to supply it.
+- Verified in the browser pane: compare view rendered 3 columns with different summaries for the baggage story (naive 7/10 favoured, hybrid 7/10, full 9/10); drawer works; mobile width works.

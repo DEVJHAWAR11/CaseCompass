@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phases 1-7 done (API verified live). Next: Phase 8 Next.js UI.
+Phases 1-8 done. Next: Phase 9 deployment + README. Needs from user: official IKanoon logo file, Render/Fly + Vercel accounts.
 
 ## Phases
 1. IK client + disk cache + ~20 test cases, data sufficiency report: DONE (see below)
