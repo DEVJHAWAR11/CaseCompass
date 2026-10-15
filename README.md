@@ -21,7 +21,7 @@ story -> rewrite into <=3 legal queries (1 LLM call)
 offline: ingest -> clean text -> chunk + embed (Jina) -> outcome extraction (Groq) -> rule checks
 ```
 
-- **Data:** 225 consumer-commission cases (about 200 airline/travel), 802 chunks, a citation graph
+- **Data:** 204 consumer-commission cases (about 185 airline/travel, after removing 21 duplicate orders), 802 chunks, a citation graph
   (plain tables + networkx). Judgment text is cleaned and stored in Postgres, so search and passages
   need no live source calls.
 - **Stack:** FastAPI + Pydantic, Supabase Postgres (pgvector + tsvector), Jina embeddings
@@ -30,24 +30,25 @@ offline: ingest -> clean text -> chunk + embed (Jina) -> outcome extraction (Gro
 - **Cost controls:** per-IP rate limit, hard cap on LLM calls per request, daily token budget,
   usage ledger, Jina quota tracking with keyword-only fallback.
 
-## Eval (27 stories, 225 cases)
+## Eval (27 stories, 204 cases)
 
 Relevance labels are coarse and rule-based (dispute-type tags), not hand-checked. Full tables and
 ablations are in [`eval/results.md`](eval/results.md).
 
 | Pipeline | hit@5 | P@5 | MRR | nDCG@10 |
 |---|---|---|---|---|
-| naive vector search | 0.96 | 0.65 | 0.87 | 0.64 |
-| + hybrid (RRF) | 0.96 | 0.69 | 0.89 | 0.64 |
-| + Jina rerank (derived text) | 0.96 | 0.66 | 0.89 | 0.62 |
-| + query rewriting (no rerank) | 0.96 | 0.69 | 0.93 | 0.65 |
-| + citation-graph expansion | 0.96 | 0.69 | 0.93 | 0.60 |
-| hybrid + rewriting + late chunking (shipped) | 1.00 | 0.73 | 0.91 | 0.69 |
+| naive vector search | 0.96 | 0.66 | 0.89 | 0.65 |
+| + hybrid (RRF) | 0.96 | 0.70 | 0.88 | 0.64 |
+| + Jina rerank (derived text) | 0.96 | 0.66 | 0.87 | 0.61 |
+| + query rewriting (no rerank) | 0.96 | 0.67 | 0.93 | 0.64 |
+| + citation-graph expansion | 0.96 | 0.67 | 0.93 | 0.60 |
+| hybrid + rewriting + late chunking (shipped) | 1.00 | 0.72 | 0.90 | 0.69 |
 
 What did not help, reported honestly: reranking on our derived text did not beat plain hybrid, so it
 is off by default; graph expansion lowered nDCG, so it is shown separately as "related cases". Late
-chunking, combined with rewriting, was better on every metric and is the shipped default. Outcome labels were about 70%
-correct on a 50-case spot check made before a rule fix; a fresh review is still to do.
+chunking, combined with rewriting, was better on every metric and is the shipped default. Outcome labels: on a 50-case sample (42 judgeable) reviewed by Claude, not a human, 76% were correct;
+after fixes made from that review, 81% on the same sample (optimistic, since the fixes were tuned
+on it). A fresh sample is still to do. Details: `eval/review_results.md`.
 
 ## Run locally
 
