@@ -68,7 +68,7 @@ class GroqProvider:
             try:
                 r = await self.client.chat.completions.create(
                     model=model, max_tokens=max_tokens, response_format={"type": "json_object"},
-                    reasoning_effort="low",
+                    reasoning_effort="none" if "qwen" in model else "low",
                     messages=[{"role": "system", "content": system},
                               {"role": "user", "content": user}])
                 break

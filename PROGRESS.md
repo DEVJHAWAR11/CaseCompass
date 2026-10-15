@@ -1,15 +1,15 @@
 # Progress
 
 ## Current phase
-Phase 3 done and rerank module built. BLOCKED on Groq API key (needed for Phase 4 query rewriting and Phase 5 extraction).
+Phases 1-6 done (eval results in eval/results.md). Next: Phase 7 FastAPI.
 
 ## Phases
 1. IK client + disk cache + ~20 test cases, data sufficiency report: DONE (see below)
 2. Schema + ingestion: DONE (152 cases ingested; `chunks` table deferred to Phase 3 until vector size is chosen)
 3. Chunking + Jina embeddings + hybrid search: DONE (548 chunks, 152 cases)
-4. Rerank + query rewriting: rerank DONE; rewriting needs Groq key
-5. Extraction (cascade) + citation graph: not started
-6. Eval set + script + results: not started
+4. Rerank + query rewriting: DONE
+5. Extraction (cascade) + citation graph: DONE (rule override added for who-won; accuracy ~70% before rules, not re-measured)
+6. Eval set + script + results: DONE (see docs/eval.md; results weak/flat, labels coarse)
 7. FastAPI endpoints, rate limit, usage logging: not started
 8. Next.js UI: not started
 9. Deployment + README: not started
@@ -46,3 +46,7 @@ Phase 3 done and rerank module built. BLOCKED on Groq API key (needed for Phase 
 
 ## Usage/cost so far
 IK: ~166 live calls, 47.4 INR of 500 spent. Jina: ~410K tokens of 10M. No Groq usage.
+
+## Groq notes
+- Free tier per model: 8,000 tokens/min, 200K tokens/day, 1,000 req/day. Models: gpt-oss-20b (small), gpt-oss-120b (large; also used for extraction after 20b quota ran out), qwen3.8-27b (tagging, discarded).
+- Config: LLM_SMALL_MODEL currently set to gpt-oss-120b in .env.

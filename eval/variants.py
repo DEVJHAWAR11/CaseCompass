@@ -32,7 +32,7 @@ class Env:
         self.store = IKTextStore(self.ik)
         self.graph = load_graph(self.conn)
         self.corpus = {r[0] for r in self.conn.execute(
-            "select tid from cases where category='airline_travel'")}
+            "select tid from cases where status='ingested' and category='airline_travel'")}
 
     async def aclose(self):
         await self.emb.aclose()
