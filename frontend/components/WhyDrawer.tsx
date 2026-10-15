@@ -24,8 +24,7 @@ export function WhyDrawer({ c, onClose }: { c: CaseHit | null; onClose: () => vo
           closest match to what you described.
         </p>
         <blockquote className="mt-4 border-l-4 border-neutral-300 pl-3 text-sm dark:border-neutral-600">
-          {c.passage?.replace(/s*
-s*/g, " ")}
+          {c.passage?.replace(/\s*\n\s*/g, " ")}
         </blockquote>
       </aside>
     </div>
