@@ -1,7 +1,10 @@
 // The five tweakable knobs for the landing page. Everything else derives from these.
 
-/** Birds in the hero flock (desktop). Mobile uses ~40% of this; reduced-motion uses 0. */
-export const BIRD_COUNT = 18;
+/** Most birds in the hero sky at once (desktop; phones get half). Reduced motion shows none. */
+export const MAX_BIRDS = 6;
+
+/** A new group of 1-3 birds appears every [min, max] seconds. */
+export const BIRD_SPAWN_SECONDS: [number, number] = [4, 9];
 
 /** Max mouse-parallax shift for the front art layer, in px (back layers move less). */
 export const PARALLAX_STRENGTH = 12;

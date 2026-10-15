@@ -21,7 +21,8 @@ export function SmoothScroll({ children }: { children: ReactNode }) {
   const lenis = useRef<Lenis | null>(null);
 
   useEffect(() => {
-    if (motionReduced()) return;
+    // Touch screens already scroll smoothly; Lenis only smooths wheel input, so skip the work there.
+    if (motionReduced() || window.matchMedia("(pointer: coarse)").matches) return;
     const instance = new Lenis({ lerp: SCROLL_LERP, smoothWheel: true });
     instance.on("scroll", ScrollTrigger.update);
     const tick = (time: number) => instance.raf(time * 1000);

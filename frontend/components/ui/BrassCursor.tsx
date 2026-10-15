@@ -49,7 +49,7 @@ export function BrassCursor() {
     <div aria-hidden="true" className="pointer-events-none fixed inset-0 z-[70] hidden [@media(pointer:fine)]:block">
       <div
         ref={ring}
-        className="absolute left-0 top-0 h-7 w-7 rounded-full border-[1.5px] border-brass mix-blend-multiply will-change-transform"
+        className="absolute left-0 top-0 h-7 w-7 rounded-full border-[1.5px] border-brass will-change-transform"
         style={{ transform: "translate3d(-100px,-100px,0)" }}
       />
       <div

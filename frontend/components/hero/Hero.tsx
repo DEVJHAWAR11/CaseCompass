@@ -17,7 +17,6 @@ const AR = HERO_2.w / HERO_2.h;
 // so every copy lines up pixel-for-pixel at rest.
 const LAYERS = [
   { key: "sky", depth: 0.25, scroll: 10, mask: undefined },
-  { key: "mid", depth: 0.55, scroll: 4, mask: "radial-gradient(ellipse 62% 72% at 70% 58%, #000 52%, transparent 80%)" },
   { key: "front", depth: 1, scroll: -6, mask: "radial-gradient(ellipse 34% 40% at 80% 86%, #000 55%, transparent 88%)" },
 ];
 // Scales of justice in hero-2 (image px): pivot at the finial (1725, 650); pans around y≈780.
@@ -25,7 +24,7 @@ const SCALES_MASK = "radial-gradient(ellipse 9% 19% at 86.25% 70%, #000 60%, tra
 const SCALES_PIVOT = "86.25% 58.2%";
 
 function Art() {
-  return <Image src={HERO_2.src} alt="" fill sizes="(min-width: 768px) 100vw, 180vw" className="select-none object-cover" draggable={false} />;
+  return <Image src={HERO_2.src} alt="" fill sizes="(min-width: 768px) 100vw, 120vw" className="select-none object-cover" draggable={false} />;
 }
 
 export function Hero() {
@@ -85,7 +84,7 @@ export function Hero() {
                 style={l.mask ? { maskImage: l.mask, WebkitMaskImage: l.mask } : undefined}
               >
                 {l.key === "sky" ? (
-                  <Image src={HERO_2.src} alt="" fill preload sizes="(min-width: 768px) 100vw, 180vw" className="select-none object-cover" draggable={false} />
+                  <Image src={HERO_2.src} alt="" fill preload sizes="(min-width: 768px) 100vw, 120vw" className="select-none object-cover" draggable={false} />
                 ) : (
                   <Art />
                 )}
@@ -103,10 +102,10 @@ export function Hero() {
           {/* warm light rays in the sunbeam */}
           <div
             aria-hidden="true"
-            className="pointer-events-none absolute inset-0 mix-blend-soft-light"
+            className="pointer-events-none absolute inset-0 opacity-60"
             style={{
               background:
-                "conic-gradient(from 200deg at 62% -10%, transparent 0deg, rgb(255 236 190 / 0.55) 12deg, transparent 22deg, rgb(255 236 190 / 0.4) 34deg, transparent 46deg, rgb(255 236 190 / 0.3) 58deg, transparent 70deg)",
+                "conic-gradient(from 200deg at 62% -10%, transparent 0deg, rgb(255 240 205 / 0.35) 12deg, transparent 22deg, rgb(255 240 205 / 0.25) 34deg, transparent 46deg, rgb(255 240 205 / 0.18) 58deg, transparent 70deg)",
             }}
           />
         </div>

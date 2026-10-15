@@ -1,15 +1,15 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { BIRD_COUNT } from "@/lib/constants";
+import { BIRD_SPAWN_SECONDS, MAX_BIRDS } from "@/lib/constants";
 import { motionReduced } from "@/lib/motion";
-import { drawPigeon, makeFlock, stepFlock } from "./boids";
+import { drawBird, rand, spawnGroup, stepBirds, type Bird } from "./birds";
 
 /**
- * Hero overlay: a boids flock of pigeons plus warm dust motes drifting in the sunbeam.
- * Decorative only (aria-hidden). Pauses when the tab is hidden or the hero is off-screen,
- * caps DPR at 2, and renders nothing under prefers-reduced-motion.
- * `liftRef` (0..1) is written by the hero's ScrollTrigger as the hero scrolls away.
+ * Hero overlay: every few seconds a small group (1-3) of pigeons crosses the sky, plus a few
+ * warm dust motes in the sunbeam. Decorative only (aria-hidden). Pauses when the tab is hidden
+ * or the hero is off-screen, caps DPR at 2, idles when nothing is on screen, and renders
+ * nothing under prefers-reduced-motion. `liftRef` (0..1) comes from the hero's ScrollTrigger.
  */
 export function FlockCanvas({ liftRef }: { liftRef: React.MutableRefObject<number> }) {
   const canvas = useRef<HTMLCanvasElement>(null);
@@ -29,15 +29,12 @@ export function FlockCanvas({ liftRef }: { liftRef: React.MutableRefObject<numbe
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
     resize();
-    const birds = makeFlock(mobile ? Math.round(BIRD_COUNT * 0.4) : BIRD_COUNT, w, h);
-    // Dust motes live in the sunbeam (upper-middle to right of the art).
-    const motes = Array.from({ length: mobile ? 14 : 30 }, () => ({
-      x: w * (0.45 + Math.random() * 0.5),
-      y: h * (0.15 + Math.random() * 0.6),
-      r: 0.6 + Math.random() * 1.6,
-      vx: -0.05 + Math.random() * 0.15,
-      vy: -0.12 - Math.random() * 0.12,
-      tw: Math.random() * Math.PI * 2,
+
+    let birds: Bird[] = [];
+    let nextSpawn = 0.2; // first group right after the (delayed) start
+    const motes = Array.from({ length: mobile ? 8 : 18 }, () => ({
+      x: Math.random(), y: 0.2 + Math.random() * 0.55,
+      r: 0.6 + Math.random() * 1.4, v: 0.008 + Math.random() * 0.012, tw: Math.random() * 6,
     }));
     const mouse = { x: 0, y: 0, active: false };
     const onMove = (e: PointerEvent) => {
@@ -50,28 +47,35 @@ export function FlockCanvas({ liftRef }: { liftRef: React.MutableRefObject<numbe
     const ro = new ResizeObserver(resize);
     ro.observe(cv);
 
-    let raf = 0, last = performance.now(), running = true, visible = true;
+    let raf = 0, last = performance.now(), clock = 0, running = true, visible = true;
     const frame = (now: number) => {
       const dt = Math.min((now - last) / 1000, 0.05);
       last = now;
-      const t = now / 1000, lift = liftRef.current;
+      clock += dt;
+      const lift = liftRef.current;
       ctx.clearRect(0, 0, w, h);
-      // motes
+
+      // dust motes rising slowly through the sunbeam (right half of the art)
+      ctx.fillStyle = "#FFF3D6";
       for (const m of motes) {
-        m.x += m.vx; m.y += m.vy; m.tw += dt * 2;
-        if (m.y < h * 0.05) { m.y = h * (0.6 + Math.random() * 0.2); m.x = w * (0.45 + Math.random() * 0.5); }
-        ctx.globalAlpha = (0.25 + 0.35 * Math.sin(m.tw) ** 2) * (1 - lift);
-        ctx.fillStyle = "#FFF3D6";
+        m.y -= m.v * dt;
+        m.tw += dt * 1.5;
+        if (m.y < 0.08) { m.y = 0.75; m.x = Math.random(); }
+        ctx.globalAlpha = (0.2 + 0.3 * Math.sin(m.tw) ** 2) * (1 - lift);
         ctx.beginPath();
-        ctx.arc(m.x, m.y, m.r, 0, Math.PI * 2);
+        ctx.arc(w * (0.5 + m.x * 0.48), h * m.y, m.r, 0, Math.PI * 2);
         ctx.fill();
       }
-      // flock
-      stepFlock(birds, { w, h, t, mouse, lift }, dt);
+
+      // occasional small groups instead of one big flock
+      if (clock >= nextSpawn && lift < 0.3 && birds.length < (mobile ? Math.ceil(MAX_BIRDS / 2) : MAX_BIRDS)) {
+        birds.push(...spawnGroup(w, h, mobile));
+        nextSpawn = clock + rand(BIRD_SPAWN_SECONDS[0], BIRD_SPAWN_SECONDS[1]);
+      }
+      birds = stepBirds(birds, { w, h, t: clock, mouse, lift }, dt);
       for (const b of birds) {
-        const size = 7 + b.depth * 9;
-        const alpha = (0.35 + b.depth * 0.5) * (1 - lift * 0.9);
-        drawPigeon(ctx, b.x, b.y, b.vx, b.vy, size, Math.sin(b.phase), "#4A3B33", alpha);
+        const tilt = Math.max(-0.25, Math.min(0.25, Math.atan2(b.vy, Math.abs(b.vx))));
+        drawBird(ctx, b.x, b.y, b.dir, b.s, b.wing, tilt, "#3E302A", b.alpha * (1 - lift * 0.9));
       }
       ctx.globalAlpha = 1;
       if (running && visible) raf = requestAnimationFrame(frame);
@@ -84,9 +88,10 @@ export function FlockCanvas({ liftRef }: { liftRef: React.MutableRefObject<numbe
     const onVis = () => { running = !document.hidden; start(); };
     document.addEventListener("visibilitychange", onVis);
     const io = new IntersectionObserver(([e]) => { visible = e.isIntersecting; start(); });
-    io.observe(cv);
-    start();
+    // Start after the page has painted, so the sky animation never competes with first load.
+    const boot = window.setTimeout(() => { io.observe(cv); start(); }, 1200);
     return () => {
+      window.clearTimeout(boot);
       cancelAnimationFrame(raf);
       io.disconnect();
       ro.disconnect();

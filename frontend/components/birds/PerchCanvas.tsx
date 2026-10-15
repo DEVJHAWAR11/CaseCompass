@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import { HERO_1 } from "@/lib/constants";
 import { motionReduced } from "@/lib/motion";
-import { coverMap, drawPigeon } from "./boids";
+import { coverMap, drawBird } from "./birds";
 
 // Perch points on the Ashoka pillar in hero-1.webp, in the image's own pixels
 // (top of the lion capital and the ledge of the abacus below it).
@@ -52,7 +52,7 @@ export function PerchCanvas({ posX = 1, posY = 0 }: { posX?: number; posY?: numb
       ctx.clearRect(0, 0, w, h);
       for (const b of birds) {
         const target = coverMap(b.p.x, b.p.y, HERO_1, { w, h }, posX, posY);
-        const size = Math.max(6, 22 * target.scale);
+        const size = Math.max(6, 20 * target.scale);
         const u = Math.min(Math.max((el - b.delay) / b.dur, 0), 1);
         if (u <= 0) continue;
         const e = 1 - Math.pow(1 - u, 3); // ease-out cubic: slows into the landing
@@ -60,10 +60,11 @@ export function PerchCanvas({ posX = 1, posY = 0 }: { posX?: number; posY?: numb
         const x = (1 - e) * (1 - e) * b.sx + 2 * (1 - e) * e * cx + e * e * target.x;
         const y = (1 - e) * (1 - e) * b.sy + 2 * (1 - e) * e * cy + e * e * target.y;
         const landed = u >= 1;
-        const vx = landed ? 1 : target.x - x + 0.01, vy = landed ? 0 : (target.y - y) * 0.3;
-        const flap = landed ? 0 : Math.sin(t * 10 + b.phase) * (1 - e * 0.7);
+        // flap hard on the way in, wings spread wide (raised) just before touching down
+        const flap = u > 0.85 ? 0.9 : Math.sin(t * 11 + b.phase);
+        const tilt = landed ? 0 : Math.max(-0.3, Math.min(0.3, (target.y - y) / (Math.abs(target.x - x) + 40)));
         const bob = landed ? Math.sin(t * 1.6 + b.bob) * 0.6 : 0;
-        drawPigeon(ctx, x, y - size * 0.15 + bob, vx, vy, size, flap, "#3B2E27", 0.9, landed);
+        drawBird(ctx, x, y - size * 0.38 + bob, 1, size, flap, tilt, "#3B2E27", 0.92, landed);
       }
       if (active) raf = requestAnimationFrame(frame);
     };
