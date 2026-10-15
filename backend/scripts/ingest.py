@@ -40,11 +40,27 @@ QUERIES = [
 ]
 PAGES_PER_QUERY = 5
 
+# Second discovery round (--extra): narrower dispute types to thicken thin categories.
+EXTRA_QUERIES = [
+    "airline offloaded passenger valid ticket compensation",
+    "lost damaged baggage airline compensation consumer",
+    "travel agent failed to refund airline ticket",
+    "tour operator package cancelled refund deficiency",
+    "visa tour package not provided refund travel company",
+    "hotel booking online portal refund deficiency in service",
+    "cruise booking cancellation refund",
+    "covid lockdown flight ticket refund credit shell",
+    "wheelchair passenger airline deficiency in service",
+    "excess baggage charges airline consumer complaint",
+    "ticket not generated payment deducted online booking airline",
+    "air cargo consignment damaged lost airline consumer",
+]
+
 # Cheap relevance signal: does the title/snippet look travel- or airline-related?
 TOPIC = re.compile(
     r"airline|airways|air ?india|indigo|spicejet|vistara|jet ?airways|go ?air|air ?asia|flight|"
     r"air ticket|travel|tour|makemytrip|goibibo|yatra|cleartrip|thomas cook|holiday|cruise|"
-    r"ticket|baggage|boarding", re.IGNORECASE)
+    r"ticket|baggage|boarding|hotel|resort|visa|cargo|passenger|tourism", re.IGNORECASE)
 
 
 def court_level(src: str) -> str | None:
@@ -71,9 +87,9 @@ def parse_date(s: str | None):
     return None
 
 
-async def discover(ik: IKClient, conn, pages: int):
+async def discover(ik: IKClient, conn, pages: int, queries=None):
     new = skipped = 0
-    for q in QUERIES:
+    for q in queries or QUERIES:
         for p in range(pages):
             res = await ik.search(q, page=p, doctypes="consumer")
             for d in res.get("docs", []):
@@ -126,7 +142,8 @@ async def fetch(ik: IKClient, conn, max_docs: int):
 
 
 async def main(a):
-    n_search = len(QUERIES) * a.pages
+    queries = EXTRA_QUERIES if a.extra else QUERIES
+    n_search = len(queries) * a.pages
     print(f"DISCOVERY: up to {n_search} search calls = {n_search * COST['search']:.2f} INR")
     print(f"FETCH:     up to {a.max_docs} doc calls  = {a.max_docs * COST['doc']:.2f} INR")
     print(f"TOTAL worst case: {n_search * COST['search'] + a.max_docs * COST['doc']:.2f} INR "
@@ -137,7 +154,7 @@ async def main(a):
     ik = IKClient()
     try:
         with psycopg.connect(url) as conn:
-            print("discover (new, skipped):", await discover(ik, conn, a.pages))
+            print("discover (new, skipped):", await discover(ik, conn, a.pages, queries))
             print("fetch (ingested, duplicates):", await fetch(ik, conn, a.max_docs))
             print(conn.execute("select status, count(*) from cases group by 1 order by 1").fetchall())
     except IKError as e:
@@ -151,6 +168,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser()
     ap.add_argument("--estimate", action="store_true")
     ap.add_argument("--run", action="store_true")
+    ap.add_argument("--extra", action="store_true", help="use EXTRA_QUERIES")
     ap.add_argument("--pages", type=int, default=PAGES_PER_QUERY)
     ap.add_argument("--max-docs", type=int, default=400)
     asyncio.run(main(ap.parse_args()))
