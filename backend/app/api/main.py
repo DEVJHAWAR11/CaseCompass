@@ -56,8 +56,13 @@ app.add_middleware(CORSMiddleware, allow_origins=settings.cors_origins.split(","
 
 
 def client_ip(request: Request) -> str:
-    """Caller IP. X-Forwarded-For is client-controlled on the left, so we only trust the entry
-    added by our own proxy hops (the Nth from the right; see TRUSTED_PROXY_HOPS)."""
+    """Caller IP, without trusting anything the client can forge.
+    Render sits behind Cloudflare, which sets CF-Connecting-IP itself (a client-sent value is
+    overwritten), so that wins. Otherwise use the X-Forwarded-For entry added by our own proxy
+    (the Nth from the right, TRUSTED_PROXY_HOPS), never the client-controlled left side."""
+    cf = request.headers.get("cf-connecting-ip", "").strip()
+    if cf:
+        return cf
     parts = [p.strip() for p in request.headers.get("x-forwarded-for", "").split(",") if p.strip()]
     hops = settings.trusted_proxy_hops
     if parts and 0 < hops <= len(parts):
@@ -87,13 +92,6 @@ class SearchRequest(BaseModel):
     story: str = Field(min_length=5, max_length=1500)
     mode: Literal["naive", "hybrid", "full"] = "full"
     top: int = Field(default=10, ge=1, le=10)
-
-
-@app.get("/_debug_ip")  # TEMPORARY: remove after checking which header carries the real client IP
-def debug_ip(request: Request):
-    keep = ("x-forwarded-for", "cf-connecting-ip", "true-client-ip", "x-real-ip", "forwarded")
-    return {"headers": {k: v for k, v in request.headers.items() if k in keep},
-            "peer": request.client.host if request.client else None}
 
 
 @app.get("/health")

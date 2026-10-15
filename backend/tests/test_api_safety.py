@@ -10,8 +10,10 @@ from app.api import main
 from app.config import settings
 
 
-def _request(xff: str | None = None, host="10.0.0.9") -> Request:
+def _request(xff: str | None = None, host="10.0.0.9", cf: str | None = None) -> Request:
     headers = [(b"x-forwarded-for", xff.encode())] if xff else []
+    if cf:
+        headers.append((b"cf-connecting-ip", cf.encode()))
     scope = {"type": "http", "headers": headers, "client": (host, 1234), "method": "GET",
              "path": "/", "query_string": b"", "app": SimpleNamespace(state=SimpleNamespace(
                  hits=defaultdict(deque)))}
@@ -21,6 +23,12 @@ def _request(xff: str | None = None, host="10.0.0.9") -> Request:
 def test_client_ip_uses_entry_added_by_our_proxy_not_the_faked_left_one():
     assert main.client_ip(_request("6.6.6.6, 203.0.113.7")) == "203.0.113.7"  # hops=1: rightmost
     assert main.client_ip(_request(None)) == "10.0.0.9"  # no header: socket peer
+
+
+def test_cloudflare_header_wins_over_forwarded_for():
+    # Render's real chain: "<faked>,<client>, <cloudflare>, <internal>"; CF-Connecting-IP is the client
+    r = _request("1.2.3.4,104.28.210.144, 104.23.160.149, 10.24.213.5", cf="104.28.210.144")
+    assert main.client_ip(r) == "104.28.210.144"
 
 
 def test_per_ip_limit_blocks_after_n_requests(monkeypatch):
