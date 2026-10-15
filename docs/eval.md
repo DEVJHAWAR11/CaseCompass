@@ -17,3 +17,8 @@ Results table: `eval/results.md` (regenerate: `backend/.venv/Scripts/python eval
 - Reranking and the graph step did not help here. The graph step lowered nDCG (0.69 -> 0.60) because it
   replaces the last 3 slots with related cases that are often a different dispute type.
 - Late chunking is roughly equal to standard chunking (slightly better on naive search).
+
+## No-storage rerank experiment
+- To avoid live Indian Kanoon calls during search, reranking was tried on text built from our own stored fields (title, court, year, AI outcome and summary, laws). It scored WORSE than plain hybrid search (nDCG 0.59 vs 0.68; P@5 0.64 vs 0.76): our summaries describe the outcome, not the dispute, so they do not match the user's story.
+- Reranking on the real matched passage was about equal to plain hybrid (nDCG 0.67 vs 0.68; P@5 0.68 vs 0.76), so the reranker never paid for its cost.
+- Best row overall: hybrid + query rewriting with no reranker (nDCG 0.70, MRR 0.93, hit@5 1.00). That is the shipped default; reranking stays available behind RERANK_ENABLED=true.

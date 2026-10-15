@@ -68,11 +68,33 @@ def to_cases(conn, chunk_ids: list[int], top=10, category: str | None = "airline
     return out
 
 
+def derived_text(conn: psycopg.Connection, tid: int, section: str) -> str:
+    """Rerank input built ONLY from our own stored fields (no judgment text, no IK call):
+    title, court, year, matched section, AI outcome + one-line summary, laws cited."""
+    r = conn.execute("select title,court,decided_on,result,refund_inr,compensation_inr,summary,"
+                     "laws_cited from cases where tid=%s", (tid,)).fetchone()
+    title, court, on, result, refund, comp, summary, laws = r
+    parts = [f"{title}. {court}, {on.year if on else 'n.d.'}.", f"Matched part: {section}.",
+             f"Outcome: {(result or 'unclear').replace('_', ' ')}."]
+    if refund:
+        parts.append(f"Refund Rs {int(refund):,}.")
+    if comp:
+        parts.append(f"Compensation Rs {int(comp):,}.")
+    if summary:
+        parts.append(summary)
+    if laws:
+        parts.append("Law: " + "; ".join(laws[:3]) + ".")
+    return " ".join(parts)
+
+
 async def search(conn, embedder: Embedder, query: str, mode="hybrid", top=10, late=False,
                  reranker: Reranker | None = None, store: CaseTextStore | None = None,
-                 queries: list[str] | None = None, candidates=30):
+                 queries: list[str] | None = None, candidates=30,
+                 rerank_source: str = "derived"):
     """mode: 'naive' (dense only) | 'keyword' | 'hybrid' | 'rerank' (hybrid + reranker).
-    `queries` = extra rewritten queries; each adds its own dense+keyword lists to the fusion."""
+    `queries` = extra rewritten queries; each adds its own dense+keyword lists to the fusion.
+    rerank_source: 'derived' (default; our own stored fields, zero Indian Kanoon calls) or
+    'passage' (the matched judgment passage, fetched live through `store`; costs IK credit)."""
     qs = [query] + (queries or [])
     lists = []
     if mode != "keyword":
@@ -85,8 +107,11 @@ async def search(conn, embedder: Embedder, query: str, mode="hybrid", top=10, la
         cases = to_cases(conn, ids, top=20)  # rerank at most 20 cases
         texts = []
         for c in cases:
-            full = await store.get_text(c["tid"])
-            texts.append(full[c["start"]:c["end"]][:1200])  # ~300 tokens each
+            if rerank_source == "passage":
+                full = await store.get_text(c["tid"])
+                texts.append(full[c["start"]:c["end"]][:1200])  # ~300 tokens each
+            else:
+                texts.append(derived_text(conn, c["tid"], c["section"]))
         scores = await (reranker or NoRerank()).rerank(query, texts)
         order = sorted(range(len(cases)), key=lambda i: scores[i], reverse=True)
         return [cases[i] | {"score": scores[i]} for i in order][:top]

@@ -11,7 +11,7 @@ import { BrassDivider } from "@/components/ui/Ornaments";
 
 type View = Mode | "compare";
 const VIEWS: { id: View; label: string; hint: string }[] = [
-  { id: "full", label: "Full pipeline", hint: "rewrite + hybrid + rerank" },
+  { id: "full", label: "Full pipeline", hint: "rewrite + hybrid search" },
   { id: "hybrid", label: "Hybrid", hint: "meaning + keywords" },
   { id: "naive", label: "Naive", hint: "meaning only" },
   { id: "compare", label: "Compare all", hint: "side by side" },

@@ -12,6 +12,8 @@ from dataclasses import dataclass
 
 import psycopg
 
+from app.config import settings
+
 from app.embeddings.jina import JinaEmbedder
 from app.graph.citation_graph import expand
 from app.ikanoon.client import IKClient, IKError
@@ -84,14 +86,16 @@ def _enrich(conn: psycopg.Connection, hits: list[dict]) -> list[dict]:
             "compensation_inr": float(r[6]) if r[6] is not None else None,
             "laws_cited": r[7] or [], "summary_ai": r[8], "source_url": r[9],
             "cited_by_count": r[10], "matched_section": h["section"],
-            "score": h.get("score"), "passage": None})
+            "match_start": h.get("start"), "match_end": h.get("end"),
+            "score": h.get("score")})
     return out
 
 
 async def run_search(sv: Services, conn: psycopg.Connection, story: str, mode: str = "full",
                      top: int = 10) -> dict:
     notices: list[str] = []
-    effective = {"naive": "naive", "hybrid": "hybrid", "full": "rerank"}[mode]
+    effective = {"naive": "naive", "hybrid": "hybrid",
+                 "full": "rerank" if settings.rerank_enabled else "hybrid"}[mode]
     queries: list[str] = []
     if is_exact_lookup(story):
         effective = "keyword"
@@ -111,14 +115,8 @@ async def run_search(sv: Services, conn: psycopg.Connection, story: str, mode: s
         effective = "keyword"
         _ = e
     cases = _enrich(conn, hits) if hits else []
-
-    # "Why this result": the matched passage, fetched live (cached) for the top 5 only.
-    for c, h in list(zip(cases, hits))[:5]:
-        try:
-            c["passage"] = (await sv.store.get_text(c["tid"]))[h["start"]:h["end"]][:1200]
-        except IKError:
-            if "Matched passages could not be loaded right now." not in notices:
-                notices.append("Matched passages could not be loaded right now.")
+    # No Indian Kanoon calls during search: ranking and reranking use only our own stored fields.
+    # The matched passage is fetched later, on demand, by GET /passage/{tid} (one call per click).
     related = []
     if cases:
         rel_ids = expand(sv.graph, [c["tid"] for c in cases[:3]], sv.corpus, k=5)

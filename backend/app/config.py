@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     cache_dir: str = "data/cache"
     database_url: str = ""
     rate_limit_per_min: int = 10
+    # Reranking is OFF by default: in our eval it did not beat plain hybrid search, and it needs
+    # either live judgment text (IK credit) or hurts quality when run on our derived text.
+    rerank_enabled: bool = False
     cors_origins: str = "http://localhost:3000"
 
     # --- Groq LLM (OpenAI-compatible). Small model first, larger one only on failure/"unclear".

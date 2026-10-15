@@ -17,7 +17,8 @@ export interface CaseHit {
   source_url: string;
   cited_by_count: number | null;
   matched_section: string;
-  passage: string | null;
+  match_start: number | null;
+  match_end: number | null;
 }
 
 export interface Stats {
@@ -41,6 +42,17 @@ export interface SearchResponse {
   notices: string[];
   disclaimer: string;
   attribution: string;
+}
+
+/** Fetch the matched passage on demand (one live Indian Kanoon call, only when the user asks). */
+export async function fetchPassage(c: CaseHit): Promise<string> {
+  try {
+    const res = await fetch(`${API_URL}/passage/${c.tid}?start=${c.match_start}&end=${c.match_end}`);
+    if (!res.ok) throw new Error("unavailable");
+    return ((await res.json()) as { passage: string }).passage;
+  } catch {
+    throw new ApiError("server_error", "The passage is unavailable right now. Use the source link to read the judgment.");
+  }
 }
 
 /** Friendly error with a kind the UI can map to a specific message. */

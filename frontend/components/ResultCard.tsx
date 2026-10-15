@@ -32,7 +32,7 @@ export function ResultCard({ c, onWhy }: { c: CaseHit; onWhy?: (c: CaseHit) => v
         {c.laws_cited.length > 0 && <div>Law cited: {c.laws_cited.slice(0, 3).join("; ")}</div>}
       </dl>
       <div className="mt-3 flex gap-4 font-ui text-sm">
-        {c.passage && onWhy && (
+        {c.match_start != null && onWhy && (
           <button onClick={() => onWhy(c)} className="text-ashoka-navy underline">
             Why this result
           </button>

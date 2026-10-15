@@ -39,9 +39,10 @@ class Env:
         await self.rr.aclose()
         await self.ik.aclose()
 
-    async def run(self, story, mode, late=False, queries=None):
+    async def run(self, story, mode, late=False, queries=None, rerank_source="derived"):
         res = await search(self.conn, self.emb, story, mode=mode, top=TOP, late=late,
-                           reranker=self.rr, store=self.store, queries=queries)
+                           reranker=self.rr, store=self.store, queries=queries,
+                           rerank_source=rerank_source)
         return [r["tid"] for r in res]
 
 
@@ -49,12 +50,18 @@ async def v_naive(env, s):          return await env.run(s, "naive")
 async def v_keyword(env, s):        return await env.run(s, "keyword")
 async def v_hybrid(env, s):         return await env.run(s, "hybrid")
 async def v_rerank(env, s):         return await env.run(s, "rerank")
+async def v_rerank_passage(env, s):  return await env.run(s, "rerank", rerank_source="passage")
 async def v_naive_late(env, s):     return await env.run(s, "naive", late=True)
 async def v_hybrid_late(env, s):    return await env.run(s, "hybrid", late=True)
 
 
 async def v_rewrite(env, s):
     return await env.run(s, "rerank", queries=await rewrite_query(env.llm, s))
+
+
+async def v_hybrid_rewrite(env, s):
+    """Rewriting + hybrid fusion, NO reranker: needs no judgment text and no rerank tokens."""
+    return await env.run(s, "hybrid", queries=await rewrite_query(env.llm, s))
 
 
 async def v_hyde(env, s):
@@ -72,7 +79,7 @@ async def v_graph(env, s):
 STAGES = [
     ("1. naive vector search", v_naive),
     ("2. + hybrid (vector + keyword, RRF)", v_hybrid),
-    ("3. + Jina rerank", v_rerank),
+    ("3. + Jina rerank (on our derived text)", v_rerank),
     ("4. + query rewriting", v_rewrite),
     ("5. + citation-graph expansion", v_graph),
 ]
@@ -81,6 +88,8 @@ ABLATIONS = [
     ("naive, late chunking", v_naive_late),
     ("hybrid, late chunking", v_hybrid_late),
     ("hybrid, no rerank (= stage 2)", v_hybrid),
-    ("hybrid + rerank (= stage 3)", v_rerank),
+    ("hybrid + rerank on derived text (= stage 3, shipped)", v_rerank),
+    ("hybrid + rerank on matched passage (needs live IK fetch)", v_rerank_passage),
+    ("hybrid + rewriting, no rerank (shipped default)", v_hybrid_rewrite),
     ("rewriting via HyDE instead", v_hyde),
 ]

@@ -111,6 +111,20 @@ async def case_endpoint(tid: int, request: Request):
             "notice": note, "disclaimer": DISCLAIMER, "attribution": ATTRIBUTION}
 
 
+@app.get("/passage/{tid}")
+async def passage_endpoint(tid: int, start: int, end: int, request: Request):
+    """The matched passage of one case, fetched live from Indian Kanoon (disk-cached).
+    Called only when a user opens "Why this result": at most one IK call per click, none
+    during search itself. Offsets come from the search response; we bound them."""
+    if not (0 <= start < end <= start + 3000):
+        raise HTTPException(400, "Invalid passage range.")
+    try:
+        text = await request.app.state.sv.store.get_text(tid)
+    except IKError:
+        raise HTTPException(503, "The passage is temporarily unavailable. Use the source link.")
+    return {"tid": tid, "passage": text[start:end][:1500], "attribution": ATTRIBUTION}
+
+
 @app.get("/usage")
 def usage():
     """Non-sensitive running totals for the cost dashboards in the README."""

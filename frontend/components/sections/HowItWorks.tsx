@@ -12,8 +12,8 @@ const STEPS = [
   },
   {
     n: "२", title: "Match", Icon: MatchIcon,
-    body: "We search judgments by meaning and by exact words at once, then a second model re-reads the best candidates.",
-    detail: "Hybrid search (vectors + Postgres full-text, fused by rank) followed by a cross-encoder reranker.",
+    body: "We search judgments by meaning and by exact words at once, and merge the two result lists into one ranking.",
+    detail: "Hybrid search: vector similarity + Postgres full-text, fused by Reciprocal Rank Fusion. Tested against a reranker; the simpler version scored as well.",
   },
   {
     n: "३", title: "Learn the outcome", Icon: ScalesIcon,

@@ -41,3 +41,20 @@ def test_rule_override_complaint_dismissed_vs_partly():
 def test_laws_regex_handles_nested_subsections():
     out = laws_cited("under Section 45(2)(g) of the Air Corporation Amendment Act, 1971")
     assert out and out[0].startswith("s.45(2)(g)")
+
+
+def test_derived_text_uses_only_stored_fields():
+    import datetime
+
+    from app.retrieval.search import derived_text
+
+    class Conn:
+        def execute(self, *a, **k):
+            class R:
+                def fetchone(self):
+                    return ("Air India vs X", "State Commission", datetime.date(2019, 5, 1),
+                            "allowed", None, 12000, "Airline ordered to pay.", ["s.14 CPA"])
+            return R()
+
+    t = derived_text(Conn(), 1, "order")
+    assert "Outcome: allowed" in t and "Compensation Rs 12,000" in t and "2019" in t
