@@ -1,7 +1,7 @@
 # Progress
 
 ## Current phase
-Phases 1-8 done, plus the illustrated landing page (/) with the search tool at /search. Next: Phase 9 deployment on Vercel + Render (user chose Render). Needs: official IKanoon logo file, Vercel and Render accounts.
+Phases 1-8 done, plus the illustrated landing page (/) with the search tool at /search. Security hardening done (migration 005, secret scan clean). Next: Phase 9 deployment on Vercel + Render (user chose Render). Needs: official IKanoon logo file, Vercel and Render accounts.
 
 ## Phases
 1. IK client + disk cache + ~20 test cases, data sufficiency report: DONE (see below)
