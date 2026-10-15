@@ -36,3 +36,15 @@ add a custom domain). Save; Render redeploys. Without this the browser blocks se
 ## Notes
 - The deployed backend never pays Indian Kanoon per click (`IK_SPEND_CAP_INR=0`); search and passages read the database.
 - Usage ledger and rate limiting: the ledger is in Postgres; the per-IP limiter is in memory (resets on restart, fine for one instance).
+
+## Deployed (2026-10-15)
+- Backend (Render, free): https://casecompass-qw3v.onrender.com (`/health`, `/search`, `/usage`)
+- Frontend (Vercel, Hobby): https://case-compass-zeta.vercel.app (project `case-compass`, root directory `frontend`, env `NEXT_PUBLIC_API_URL`)
+- Checked end to end: search from the Vercel site returns cases from the Render backend, IKanoon logo and disclaimer show.
+
+## What went wrong on the way (so it is not repeated)
+- The Render service was created by hand, not from the Blueprint, so `render.yaml` was ignored: the first deploy failed with "open Dockerfile: no such file". Fix: Settings > Dockerfile Path = `backend/Dockerfile` (build context `.`).
+- Because of that, the non-secret settings in `render.yaml` were not applied. Added by hand: `IK_SPEND_CAP_INR=0`, `LLM_SMALL_MODEL=openai/gpt-oss-120b`, `LLM_MIN_INTERVAL_S=3`, `CORS_ORIGINS=<Vercel URL>`.
+- `CORS_ORIGINS` had been filled with an unrelated string, so the browser would have blocked every search. Symptom: preflight returns 400 with no `access-control-allow-origin`. Check with `curl -i -X OPTIONS <api>/search -H "Origin: <site>" -H "Access-Control-Request-Method: POST"`.
+- Vercel detected backend + frontend and offered a multi-service project; choose "Import single project" on the frontend. `case-compass.vercel.app` belongs to someone else; ours is `case-compass-zeta.vercel.app`.
+- Render's env form needs real typing; setting a field programmatically left it empty.
