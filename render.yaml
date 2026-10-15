@@ -1,0 +1,29 @@
+# Render blueprint: one free web service running the backend container.
+# Secrets (sync: false) are entered in the Render dashboard, never committed.
+services:
+  - type: web
+    name: casecompass-api
+    runtime: docker
+    plan: free
+    dockerfilePath: backend/Dockerfile
+    dockerContext: .
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: JINA_API_KEY
+        sync: false
+      - key: IK_API_TOKEN
+        sync: false
+      - key: CORS_ORIGINS
+        sync: false        # the Vercel URL, e.g. https://casecompass.vercel.app
+      - key: LLM_SMALL_MODEL
+        value: openai/gpt-oss-120b
+      - key: LLM_MIN_INTERVAL_S
+        value: "3"
+      - key: STORE_TEXT
+        value: "true"
+      - key: IK_SPEND_CAP_INR
+        value: "0"         # deployed app never pays Indian Kanoon per click

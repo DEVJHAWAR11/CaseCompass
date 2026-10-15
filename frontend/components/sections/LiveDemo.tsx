@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/hooks/useGsap";
 import { TiltCard } from "@/components/ui/Interactive";
-import { IKanoonLogo } from "@/components/Attribution";
 
 const STORY = "SpiceJet cancelled my flight and still hasn't refunded the ticket";
 
@@ -84,7 +83,6 @@ export function LiveDemo() {
             <p className="font-ui text-sm text-ink-soft">
               {showCards ? "In 3 of 3 cases shown, the commission ruled fully or partly for the passenger." : "Searching judgments…"}
             </p>
-            <IKanoonLogo />
           </div>
           <ul className="mt-5 grid gap-5 md:grid-cols-3" aria-live="polite">
             {showCards &&

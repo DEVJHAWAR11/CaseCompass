@@ -117,8 +117,12 @@ export default function SearchPage() {
 
       {results && (
         <section className="mt-12" aria-label="Results">
-          <div className="mb-5">
+          {/* The one place the logo appears: right above results that show IK content. */}
+          <div className="mb-6 flex flex-wrap items-center gap-4 rounded-md border border-brass/50 bg-parchment-deep/60 p-3">
             <IKanoonLogo />
+            <p className="font-ui text-xs text-ink-soft">
+              Judgments and citations come from Indian Kanoon. Not endorsed by Indian Kanoon.
+            </p>
           </div>
           <div className={`grid gap-8 ${shown.length > 1 ? "lg:grid-cols-3" : "mx-auto max-w-3xl"}`}>
             {shown.map((m) => {
