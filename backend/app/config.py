@@ -16,6 +16,10 @@ class Settings(BaseSettings):
     cache_dir: str = "data/cache"
     database_url: str = ""
     rate_limit_per_min: int = 10
+    # Searches per minute across ALL visitors (protects the free LLM/embedding budget).
+    global_rate_limit_per_min: int = 60
+    # Proxies in front of the app that append to X-Forwarded-For (Render: 1).
+    trusted_proxy_hops: int = 1
     # Reranking is OFF by default: in our eval it did not beat plain hybrid search, and it needs
     # either live judgment text (IK credit) or hurts quality when run on our derived text.
     rerank_enabled: bool = False

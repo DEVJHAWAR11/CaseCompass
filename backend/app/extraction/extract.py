@@ -61,7 +61,7 @@ def laws_cited(text: str, limit=8) -> list[str]:
     Acts mentioned by name. Pure regex: no LLM tokens spent on this."""
     out: list[str] = []
     for sec, act in _LAW.findall(text):
-        item = "s.%s %s" % (sec, re.sub(r"\s+", " ", act).strip())
+        item = f"s.{sec} {re.sub(r'\s+', ' ', act).strip()}"
         if item not in out:
             out.append(item)
     named = [re.sub(r"\s+", " ", a).strip() for a in _ACT.findall(text)]

@@ -15,11 +15,11 @@ from openai import APIStatusError
 from pydantic import BaseModel
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.chunking.chunker import chunk_judgment  # noqa: E402
-from app.config import settings  # noqa: E402
-from app.ikanoon.client import IKClient  # noqa: E402
-from app.llm.provider import GroqProvider  # noqa: E402
-from app.textstore import IKTextStore  # noqa: E402
+from app.chunking.chunker import chunk_judgment
+from app.config import settings
+from app.ikanoon.client import IKClient
+from app.llm.provider import GroqProvider
+from app.textstore import IKTextStore
 
 MODEL = "qwen/qwen3.8-27b"
 TYPES = ["cancel_refund", "denied_boarding", "baggage", "delay", "agent_package", "other"]

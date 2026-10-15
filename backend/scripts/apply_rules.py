@@ -12,8 +12,8 @@ from pathlib import Path
 import psycopg
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.config import settings  # noqa: E402
-from app.extraction.extract import amounts_from_order, op_appeal_dismissed, rule_override  # noqa: E402
+from app.config import settings
+from app.extraction.extract import amounts_from_order, op_appeal_dismissed, rule_override
 
 
 def main():

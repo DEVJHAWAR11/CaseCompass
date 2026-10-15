@@ -14,12 +14,12 @@ from pathlib import Path
 import psycopg
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.chunking.chunker import chunk_judgment, context_line  # noqa: E402
-from app.config import settings  # noqa: E402
-from app.embeddings.jina import JinaEmbedder, est_tokens  # noqa: E402
-from app.ikanoon.client import IKClient  # noqa: E402
-from app.textstore import IKTextStore  # noqa: E402
-from app.usage.ledger import JinaPoolExhausted, jina_used  # noqa: E402
+from app.chunking.chunker import chunk_judgment, context_line
+from app.config import settings
+from app.embeddings.jina import JinaEmbedder, est_tokens
+from app.ikanoon.client import IKClient
+from app.textstore import IKTextStore
+from app.usage.ledger import JinaPoolExhausted, jina_used
 
 
 async def main(run: bool, limit: int):

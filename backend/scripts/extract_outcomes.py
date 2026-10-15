@@ -12,11 +12,11 @@ from pathlib import Path
 import psycopg
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.config import settings  # noqa: E402
-from app.extraction.extract import EXTRACTION_VERSION, FACTS_CHARS, ORDER_CHARS, extract_case  # noqa: E402
-from app.ikanoon.client import IKClient  # noqa: E402
-from app.llm.provider import GroqProvider, LLMBudgetExceeded  # noqa: E402
-from app.textstore import IKTextStore  # noqa: E402
+from app.config import settings
+from app.extraction.extract import EXTRACTION_VERSION, FACTS_CHARS, ORDER_CHARS, extract_case
+from app.ikanoon.client import IKClient
+from app.llm.provider import GroqProvider, LLMBudgetExceeded
+from app.textstore import IKTextStore
 
 
 async def main(run: bool, limit: int):

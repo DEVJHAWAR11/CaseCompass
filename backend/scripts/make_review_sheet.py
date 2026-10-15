@@ -17,7 +17,7 @@ from pathlib import Path
 import psycopg
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.config import ROOT, settings  # noqa: E402
+from app.config import ROOT, settings
 
 OUT = ROOT / "data" / "review" / "accuracy_sheet.csv"
 COLUMNS = ["tid", "title", "ai_result", "ai_refund_inr", "ai_compensation_inr", "ai_summary",
@@ -33,7 +33,8 @@ def main(n: int, seed: int, out: Path, exclude: Path | None):
            where c.status='ingested' and c.category='airline_travel' and c.result is not null
            order by c.tid""").fetchall()
     if exclude and exclude.exists():  # never re-use cases already reviewed (keeps a fresh sample unbiased)
-        seen = {int(r["tid"]) for r in csv.DictReader(open(exclude, encoding="utf-8-sig"))}
+        with open(exclude, encoding="utf-8-sig") as f:
+            seen = {int(r["tid"]) for r in csv.DictReader(f)}
         rows = [r for r in rows if r[0] not in seen]
     random.Random(seed).shuffle(rows)
     out.parent.mkdir(parents=True, exist_ok=True)

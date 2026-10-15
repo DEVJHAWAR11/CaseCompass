@@ -120,4 +120,4 @@ async def search(conn, embedder: Embedder, query: str, mode="hybrid", top=10, la
     return to_cases(conn, ids, top=top)
 
 
-__all__ = ["search", "dense", "keyword", "rrf", "to_cases", "settings"]
+__all__ = ["dense", "keyword", "rrf", "search", "settings", "to_cases"]

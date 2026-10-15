@@ -27,6 +27,6 @@ async def rewrite_query(llm: LLMProvider, story: str, hyde: bool = False) -> lis
         obj, _, _ = await run_cascade(
             llm, _HYDE if hyde else _SYS, story[:800], Rewrite.model_validate_json,
             max_tokens=400, stage="rewrite_hyde" if hyde else "rewrite")
-    except Exception:
+    except Exception:  # noqa: BLE001 - any LLM/network failure just means no rewrite
         return []
     return [q.strip() for q in obj.q if q.strip()][:3] if obj else []

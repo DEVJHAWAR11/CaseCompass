@@ -1,9 +1,8 @@
 """Usage ledger: one row per external call, plus Jina free-pool guard (warn 70%, stop 90%)."""
 import logging
 
-import psycopg
-
 from app.config import settings
+from app.db import connect
 
 log = logging.getLogger("usage")
 
@@ -13,7 +12,7 @@ class JinaPoolExhausted(Exception):
 
 
 def _conn():
-    return psycopg.connect(settings.database_url, autocommit=True)
+    return connect()
 
 
 def log_usage(service, model, stage, tokens_in=0, tokens_out=0, cost_inr=0.0, cached=False,

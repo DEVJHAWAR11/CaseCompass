@@ -11,9 +11,9 @@ from pathlib import Path
 import psycopg
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from app.config import settings  # noqa: E402
-from app.ikanoon.client import IKClient  # noqa: E402
-from app.textstore import IKTextStore  # noqa: E402
+from app.config import settings
+from app.ikanoon.client import IKClient
+from app.textstore import IKTextStore
 
 
 async def main():

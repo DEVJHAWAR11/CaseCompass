@@ -7,10 +7,9 @@ IKTextStore: live fetch only (the earlier no-storage behaviour); kept for switch
 """
 from typing import Protocol
 
-import psycopg
-
 from app.chunking.chunker import clean_text
 from app.config import settings
+from app.db import connect
 from app.ikanoon.client import IKClient
 
 
@@ -31,12 +30,12 @@ class DBTextStore:
         self.live = IKTextStore(ik)
 
     def _read(self, tid: int) -> str | None:
-        with psycopg.connect(settings.database_url, autocommit=True) as c:
+        with connect() as c:
             row = c.execute("select text from case_texts where tid=%s", (tid,)).fetchone()
         return row[0] if row else None
 
     def _write(self, tid: int, text: str) -> None:
-        with psycopg.connect(settings.database_url, autocommit=True) as c:
+        with connect() as c:
             c.execute("insert into case_texts(tid,text,chars) values(%s,%s,%s) "
                       "on conflict(tid) do nothing", (tid, text, len(text)))
 
