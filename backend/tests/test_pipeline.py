@@ -132,3 +132,9 @@ def test_operative_order_does_not_split_on_abbreviations():
     text = "Spicejet Ltd. and Air India Pvt. Ltd. are directed to pay Rs. 5,000/- to the complainant."
     assert operative_order(text) == text
     assert operative_order("No decision words here at all, only background text about a trip.") is None
+
+
+def test_summary_line_uses_singular_for_one_case():
+    stats = {"total": 3, "favoured_complainant": 2, "dismissed": 1, "unclear": 0,
+             "median_compensation_inr": 50000, "with_compensation": 1}
+    assert "(1 case)" in summary_line(stats) and "1 cases" not in summary_line(stats)

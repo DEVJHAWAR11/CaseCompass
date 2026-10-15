@@ -66,7 +66,8 @@ def summary_line(stats: dict) -> str:
     s = (f"In {fav} of {n} similar cases, the commission ruled fully or partly in favour of the "
          f"complainant; {stats['dismissed']} were dismissed and {stats['unclear']} had an unclear outcome.")
     if stats["median_compensation_inr"]:
-        s += (f" Where an amount was extracted ({stats['with_compensation']} cases), the median "
+        k = stats["with_compensation"]
+        s += (f" Where an amount was extracted ({k} {'case' if k == 1 else 'cases'}), the median "
               f"compensation was Rs {int(stats['median_compensation_inr']):,}.")
     return s
 
