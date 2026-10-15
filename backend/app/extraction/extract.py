@@ -14,6 +14,8 @@ from app.chunking.chunker import chunk_judgment
 from app.llm.cascade import run_cascade
 from app.llm.provider import LLMProvider
 
+# Bump when the prompt, trimming or rules change; stored per case so reruns can target old rows.
+EXTRACTION_VERSION = "v2"
 FACTS_CHARS = 1200
 ORDER_CHARS = 2400
 

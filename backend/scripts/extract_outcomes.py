@@ -13,7 +13,7 @@ import psycopg
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.config import settings  # noqa: E402
-from app.extraction.extract import FACTS_CHARS, ORDER_CHARS, extract_case  # noqa: E402
+from app.extraction.extract import EXTRACTION_VERSION, FACTS_CHARS, ORDER_CHARS, extract_case  # noqa: E402
 from app.ikanoon.client import IKClient  # noqa: E402
 from app.llm.provider import GroqProvider, LLMBudgetExceeded  # noqa: E402
 from app.textstore import IKTextStore  # noqa: E402
@@ -41,9 +41,10 @@ async def main(run: bool, limit: int):
                 continue
             conn.execute(
                 """update cases set result=%s, refund_inr=%s, compensation_inr=%s, laws_cited=%s,
-                   summary=%s, category=%s, extracted_by=%s, extracted_at=now() where tid=%s""",
+                   summary=%s, category=%s, extracted_by=%s, extraction_version=%s, extracted_at=now()
+                   where tid=%s""",
                 (obj.r, obj.ref, obj.comp, json.dumps(laws), obj.s,
-                 "airline_travel" if obj.rel else "other", model, tid))
+                 "airline_travel" if obj.rel else "other", model, EXTRACTION_VERSION, tid))
             n += 1
             esc += escalated
             trunc += cut
