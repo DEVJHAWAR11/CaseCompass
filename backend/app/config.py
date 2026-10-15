@@ -19,6 +19,8 @@ class Settings(BaseSettings):
     # Reranking is OFF by default: in our eval it did not beat plain hybrid search, and it needs
     # either live judgment text (IK credit) or hurts quality when run on our derived text.
     rerank_enabled: bool = False
+    # Keep cleaned judgment text in our database (table case_texts). See migrations/004.
+    store_text: bool = True
     cors_origins: str = "http://localhost:3000"
 
     # --- Groq LLM (OpenAI-compatible). Small model first, larger one only on failure/"unclear".

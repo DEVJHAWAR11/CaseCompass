@@ -50,3 +50,6 @@ IK: ~166 live calls, 47.4 INR of 500 spent. Jina: ~410K tokens of 10M. No Groq u
 ## Groq notes
 - Free tier per model: 8,000 tokens/min, 200K tokens/day, 1,000 req/day. Models: gpt-oss-20b (small), gpt-oss-120b (large; also used for extraction after 20b quota ran out), qwen3.8-27b (tagging, discarded).
 - Config: LLM_SMALL_MODEL currently set to gpt-oss-120b in .env.
+
+## Update: judgment text now stored (owner decision)
+case_texts table (152 rows), DBTextStore, RLS enabled on all tables. IK email sent by owner (non-commercial verification + storage question). Next: Phase 9 deployment; optionally add 150-350 more cases once IK verifies the Rs 10,000/month non-commercial credit; 50-case accuracy review.

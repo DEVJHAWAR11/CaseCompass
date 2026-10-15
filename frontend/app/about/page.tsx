@@ -19,7 +19,7 @@ export default function About() {
       <p>
         Case text and citations come from the Indian Kanoon API (indiankanoon.org). The data is
         published as-is from government sources with no accuracy warranty. CaseCompass is an
-        independent project and is not endorsed by, or affiliated with, Indian Kanoon.
+        independent project and is not endorsed by, or affiliated with, Indian Kanoon. To power search and show matched passages, a copy of the judgment text is kept in our database; the version on Indian Kanoon and the issuing commission remains the authoritative record.
       </p>
       <IKanoonLogo />
       <h2 className="font-display text-2xl">How the outcomes are produced</h2>
@@ -37,3 +37,4 @@ export default function About() {
     </main>
   );
 }
+

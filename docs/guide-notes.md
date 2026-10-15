@@ -81,3 +81,10 @@ Keep this current. Every number here comes from a real run; mistakes are recorde
 - e-Jagriti (official portal): public advance search needs a CAPTCHA, searches only complainant/respondent/industry name by commission and filing-date range, not judgment text; Terms & Conditions allow reproduction if accurate, not misleading, source acknowledged, third-party copyright excluded. Automated collection would require bypassing the CAPTCHA, which we will not do. Not a viable bulk source.
 - Other sources: AWS Open Data (Supreme Court + 25 High Courts, CC-BY-4.0, wrong court level); research corpora (Nyay-Darpan 570 consumer cases, DRAssist NCDRC insurance cases) not confirmed public; commercial APIs (Vaquill, eCourtsIndia: vendor claims unverified; CaseMine/SCC/Manupatra subscription only).
 - Legal note (secondary source, not legal advice): Eastern Book Co. case held raw judgment text has no copyright in India; restrictions come from contract terms (IK API terms, portal terms).
+
+## Decision: store judgment text (2026-10)
+- Owner decision: store cleaned judgment text despite IK terms being silent on storage; the owner has emailed IK. Risk accepted by the owner; reversible (STORE_TEXT=false, drop table case_texts).
+- Table case_texts: 152 rows, 2.80 M characters (~3 MB; Supabase free tier is 500 MB). Backfilled from the local IK cache with 0 live calls (IK spend stayed 48.0 INR).
+- DBTextStore reads our table first, falls back to a live IK fetch on a miss and saves it. Verified: with the local IK cache hidden, /search, /passage and /case all worked and no IK cache entries were created (zero IK dependency for stored cases).
+- Security catch: Supabase exposes public-schema tables through its REST API, and tables made via SQL have row-level security OFF, so anyone with the project's public key could have read them. Migration 004 enables RLS (no policies) on all six tables; our direct DB connection bypasses RLS.
+- What it unlocks: deployed app never pays per click; rerank on real passages is possible again (eval: no gain, stays off); re-extraction and re-chunking are free; more cases can be added without worrying about re-paying.

@@ -21,7 +21,7 @@ from app.ikanoon.client import IKClient, IKError
 from app.llm.provider import GroqProvider, tokens_today
 from app.rerank.rerank import JinaReranker
 from app.retrieval.pipeline import Services, run_search
-from app.textstore import IKTextStore
+from app.textstore import make_text_store
 from app.usage.ledger import jina_used
 
 ATTRIBUTION = ("Case text and citations are provided by Indian Kanoon (indiankanoon.org). "
@@ -40,7 +40,7 @@ async def lifespan(app: FastAPI):
     ik = IKClient()
     app.state.sv = Services(
         emb=JinaEmbedder("query"), rr=JinaReranker(), llm=GroqProvider(), ik=ik,
-        store=IKTextStore(ik), graph=load_graph(conn),
+        store=make_text_store(ik), graph=load_graph(conn),
         corpus={r[0] for r in conn.execute(
             "select tid from cases where status='ingested' and category='airline_travel'")})
     conn.close()

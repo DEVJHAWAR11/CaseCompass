@@ -16,7 +16,7 @@ Status and next steps live in `PROGRESS.md`. Detail lives in `docs/` (read only 
 - Show the "powered by IKanoon" logo unaltered (no resize/edit/cover) above any results showing their content; mention source in About. Never imply IKanoon endorsement.
 - Prepaid per request: search 0.50 INR, doc 0.20, fragment 0.05, metainfo 0.02. 500 INR free. Cache every response on disk, never refetch.
 - App must not hard-depend on live IK calls (balance 0 = empty responses). Friendly errors, never crash.
-- Full-text storage is NOT confirmed allowed. Store only case IDs, our extracted fields, chunk embeddings, citation links. Fetch full text live on case open, cached. Keep storage behind `CaseTextStore` so it can switch.
+- Storage: IK terms are silent on storing text. The owner decided (2026-10) to store cleaned judgment text in `case_texts` (`STORE_TEXT=true`; an email to IK is pending). Switch back with STORE_TEXT=false (live fetch only) and `drop table case_texts`. Text is served through `CaseTextStore`; never expose bulk text dumps.
 - Data is "as is", no accuracy warranty: show disclaimer.
 
 ## Stack
@@ -52,3 +52,4 @@ Code before LLM (regex for dates, amounts, courts, section numbers; stats in cod
 
 ## Git
 Commit after each meaningful chunk (~20-30 min). One-line plain-human messages ("added the Indian Kanoon client with response caching"). No prefixes (feat:/fix:), no emojis, no bodies, no AI/Claude mention. Don't push until the user says so.
+
