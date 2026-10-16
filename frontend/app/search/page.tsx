@@ -76,7 +76,9 @@ export default function SearchPage() {
           className="w-full rounded-xl border border-brass/60 bg-[#fffaf0]/70 p-4 text-lg shadow-inner placeholder:text-ink-soft/70"
         />
         <div className="mt-4 flex flex-wrap items-center justify-between gap-3 font-ui">
-          <div role="radiogroup" aria-label="Search mode" className="flex flex-wrap gap-1.5 text-sm">
+          <details className="text-sm">
+            <summary className="cursor-pointer text-ink-soft underline underline-offset-2">Advanced: compare search methods</summary>
+          <div role="radiogroup" aria-label="Search mode" className="mt-2 flex flex-wrap gap-1.5 text-sm">
             {VIEWS.map((v) => (
               <button
                 key={v.id}
@@ -92,6 +94,7 @@ export default function SearchPage() {
               </button>
             ))}
           </div>
+          </details>
           <div className="flex items-center gap-3">
             {!story && (
               <button onClick={() => setStory(EXAMPLE)} className="text-sm text-ink-soft underline">

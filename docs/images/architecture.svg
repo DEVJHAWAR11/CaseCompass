@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 500" font-family="Segoe UI, Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4b3a2a"/></marker>
+    <style>.t{font-size:15px;fill:#2e2118}.s{font-size:12.5px;fill:#5a4636}.h{font-size:13px;font-weight:700;fill:#1f2a5c;letter-spacing:.06em}
+    .b{fill:#fff8e8;stroke:#b8893b;stroke-width:1.5}.d{fill:#e6ecf7;stroke:#1f2a5c;stroke-width:1.5}.o{fill:#eaf1dc;stroke:#6b7d45;stroke-width:1.5}.x{fill:#f6e3dc;stroke:#b5523b;stroke-width:1.5}
+    .l{stroke:#4b3a2a;stroke-width:1.6;fill:none}.dl{stroke:#4b3a2a;stroke-width:1.4;fill:none;stroke-dasharray:6 5}</style>
+  </defs>
+  <rect width="960" height="500" fill="#ffffff"/>
+  <text x="30" y="34" font-size="20" font-weight="700" fill="#2e2118">CaseCompass: system architecture</text>
+  <text x="30" y="56" class="s">Solid arrows = every search. Dashed = offline jobs run by the owner, never by visitors.</text>
+
+  <rect class="b" x="30" y="90" width="190" height="90" rx="10"/><text x="125" y="120" text-anchor="middle" class="t">Browser</text><text x="125" y="141" text-anchor="middle" class="s">Next.js site on Vercel</text><text x="125" y="157" text-anchor="middle" class="s">/ , /search , /about</text>
+  <rect class="o" x="290" y="75" width="250" height="260" rx="10"/><text x="415" y="102" text-anchor="middle" class="t">Backend: FastAPI on Render</text>
+  <text x="415" y="128" text-anchor="middle" class="s">POST /search   GET /passage/{id}</text><text x="415" y="146" text-anchor="middle" class="s">GET /case/{id}   GET /health   GET /usage</text>
+  <rect class="b" x="310" y="165" width="210" height="34" rx="6"/><text x="415" y="187" text-anchor="middle" class="s">rate limits: per-IP + global</text>
+  <rect class="b" x="310" y="205" width="210" height="34" rx="6"/><text x="415" y="227" text-anchor="middle" class="s">retrieval: rewrite, hybrid, RRF</text>
+  <rect class="b" x="310" y="245" width="210" height="34" rx="6"/><text x="415" y="267" text-anchor="middle" class="s">stats + cards built in code</text>
+  <rect class="b" x="310" y="285" width="210" height="34" rx="6"/><text x="415" y="307" text-anchor="middle" class="s">usage ledger, budgets, fallbacks</text>
+
+  <rect class="d" x="620" y="75" width="310" height="110" rx="10"/><text x="775" y="102" text-anchor="middle" class="t">Supabase Postgres</text>
+  <text x="775" y="125" text-anchor="middle" class="s">pgvector (HNSW) + tsvector (GIN)</text><text x="775" y="143" text-anchor="middle" class="s">tables: cases, chunks, case_texts,</text><text x="775" y="161" text-anchor="middle" class="s">citations, usage_log, jobs</text>
+  <rect class="x" x="620" y="205" width="145" height="62" rx="10"/><text x="692" y="231" text-anchor="middle" class="t">Jina</text><text x="692" y="249" text-anchor="middle" class="s">embeds the query</text>
+  <rect class="x" x="785" y="205" width="145" height="62" rx="10"/><text x="857" y="231" text-anchor="middle" class="t">Groq LLM</text><text x="857" y="249" text-anchor="middle" class="s">rewrites the query</text>
+
+  <path class="l" d="M220 135H288" marker-end="url(#a)"/><path class="l" d="M540 120H618" marker-end="url(#a)"/><path class="l" d="M540 236H618" marker-end="url(#a)"/><path class="l" d="M540 290H857V269" marker-end="url(#a)"/>
+
+  <text x="30" y="378" class="h">OFFLINE JOBS (PYTHON SCRIPTS IN backend/scripts)</text>
+  <rect class="x" x="30" y="392" width="160" height="70" rx="10"/><text x="110" y="418" text-anchor="middle" class="t">Indian Kanoon</text><text x="110" y="437" text-anchor="middle" class="s">search + fetch judgments</text><text x="110" y="451" text-anchor="middle" class="s">(paid per call, cached)</text>
+  <rect class="b" x="235" y="392" width="150" height="70" rx="10"/><text x="310" y="418" text-anchor="middle" class="t">ingest</text><text x="310" y="437" text-anchor="middle" class="s">filter noise, dedupe,</text><text x="310" y="451" text-anchor="middle" class="s">store cleaned text</text>
+  <rect class="b" x="430" y="392" width="150" height="70" rx="10"/><text x="505" y="418" text-anchor="middle" class="t">extract</text><text x="505" y="437" text-anchor="middle" class="s">Groq reads order, JSON,</text><text x="505" y="451" text-anchor="middle" class="s">code rules fix/verify</text>
+  <rect class="b" x="625" y="392" width="150" height="70" rx="10"/><text x="700" y="418" text-anchor="middle" class="t">chunk + embed</text><text x="700" y="437" text-anchor="middle" class="s">Jina vectors, offsets,</text><text x="700" y="451" text-anchor="middle" class="s">keyword index</text>
+  <rect class="d" x="810" y="392" width="120" height="70" rx="10"/><text x="870" y="423" text-anchor="middle" class="t">Postgres</text><text x="870" y="443" text-anchor="middle" class="s">same database</text>
+  <path class="dl" d="M190 427H233M385 427H428M580 427H623M775 427H808" marker-end="url(#a)"/>
+</svg>
