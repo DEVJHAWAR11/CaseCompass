@@ -3,6 +3,7 @@ import { Cormorant_Garamond, Hind, Tiro_Devanagari_Hindi } from "next/font/googl
 import "./globals.css";
 import { SmoothScroll } from "@/hooks/useLenis";
 import { BrassCursor } from "@/components/ui/BrassCursor";
+import { WarmBackend } from "@/components/ui/WarmBackend";
 
 // Display serif: high contrast, used large with tight tracking.
 const cormorant = Cormorant_Garamond({
@@ -39,6 +40,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <div className="vignette" aria-hidden="true" />
         <div className="paper-grain" aria-hidden="true" />
         <BrassCursor />
+        <WarmBackend />
       </body>
     </html>
   );
