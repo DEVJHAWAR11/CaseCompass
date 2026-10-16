@@ -153,7 +153,7 @@ a definition problem) and 6 of 9 in sample 2. Caveat that matters: the reviewer 
 characters, so it is a strong sanity check, not ground truth; a lawyer-reviewed sample would be the real test.
 
 ### After the diversification round
-- Airline eval re-run on the 424-case corpus: shipped pipeline hit@5 1.00, P@5 0.70, MRR 0.94, nDCG 0.68 (was 1.00 / 0.72 / 0.90 / 0.69): flat within noise.
+- Airline eval re-run on the final 627-case collection: shipped pipeline hit@5 1.00, P@5 0.67, MRR 0.96, nDCG 0.66 (204 cases: 1.00 / 0.72 / 0.90 / 0.69): roughly flat; MRR up, precision slightly down because new airline cases have no hand labels.
 - Multi-category check (`eval/run_multi.py`, 16 stories over eight non-travel categories): the expected AI-assigned category was in 70 of 80
   top-5 results (88%), at least one right in 16 of 16 stories, top-1 right in 15 of 16. Weaker: education and telecom 7/10, online shopping 1/5 (only 2-4 cases).
 - Extraction prompt v3 (adds a PARTIES header and a category field): on 40 hand-labelled cases the raw model got 75% right (v2 raw was about 71%): no clear gain. Category tagging worked.

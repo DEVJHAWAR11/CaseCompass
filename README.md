@@ -186,21 +186,21 @@ security is on for every table and Supabase's public API roles have no privilege
 ## 5. Evaluation (honest numbers)
 
 **Retrieval**: 27 plain-language airline stories, relevance by dispute-type tags, searching the airline category
-(measured on the 424-case corpus; the corpus later grew to 600+ cases).
+(measured on the final 627-case collection).
 
 | Pipeline | hit@5 | P@5 | MRR | nDCG@10 |
 |---|---|---|---|---|
-| naive vector search | 0.96 | 0.66 | 0.87 | 0.65 |
-| + hybrid (RRF) | 0.96 | 0.67 | 0.89 | 0.63 |
-| + Jina rerank (derived text) | 0.96 | 0.65 | 0.87 | 0.59 |
-| + query rewriting (no rerank) | 0.96 | 0.66 | 0.91 | 0.62 |
-| + citation-graph merge | 0.96 | 0.66 | 0.91 | 0.58 |
-| **hybrid + rewriting + late chunking (shipped)** | **1.00** | **0.70** | **0.94** | **0.68** |
+| naive vector search | 0.96 | 0.61 | 0.87 | 0.61 |
+| + hybrid (RRF) | 0.96 | 0.64 | 0.89 | 0.62 |
+| + Jina rerank (derived text) | 0.96 | 0.61 | 0.89 | 0.58 |
+| + query rewriting (no rerank) | 0.96 | 0.64 | 0.91 | 0.61 |
+| + citation-graph merge | 0.96 | 0.64 | 0.91 | 0.57 |
+| **hybrid + rewriting + late chunking (shipped)** | **1.00** | **0.67** | **0.96** | **0.66** |
 
 What did **not** help, reported honestly: reranking on our derived text was worse than plain hybrid, so it is off;
 merging the citation graph into the ranking lowered nDCG, so related cases are shown as a separate list. Late chunking
 plus rewriting was best or equal on every metric and is the shipped default. After adding about 400 cases from other
-categories the airline numbers stayed flat (new airline cases have no hand labels, which pushes precision down slightly).
+categories the airline numbers stayed roughly flat: MRR rose from 0.90 to 0.96 while precision slipped from 0.72 to 0.67 (new airline cases have no hand labels, so they count as irrelevant).
 
 **Other categories**: a 16-story check (insurance, medical, property, banking, goods, education, telecom, online shopping)
 found the expected dispute type in 70 of 80 top-5 results (88%) and at least one right result in all 16 stories (re-measured on the full 627-case collection: same 88%).
