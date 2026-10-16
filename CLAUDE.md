@@ -13,7 +13,7 @@ Status and next steps live in `PROGRESS.md`. Detail lives in `docs/` (read only 
 ## Indian Kanoon (IK) terms the code must respect
 - Read api.indiankanoon.org docs before coding; don't guess the API shape. Auth = public/private key request signing.
 - Private key: backend env only. Never frontend, never committed.
-- Show the "powered by IKanoon" logo unaltered (no resize/edit/cover) above any results showing their content; mention source in About. Never imply IKanoon endorsement.
+- Show the "powered by IKanoon" logo unaltered (no resize/edit/cover) on the results page (owner decision 2026-10-16: at the end of the results, in the footer, not above them; IK terms say "above results", so this is the owner's accepted risk); mention source in About. Never imply IKanoon endorsement.
 - Prepaid per request: search 0.50 INR, doc 0.20, fragment 0.05, metainfo 0.02. 500 INR free. Cache every response on disk, never refetch.
 - App must not hard-depend on live IK calls (balance 0 = empty responses). Friendly errors, never crash.
 - Storage: IK terms are silent on storing text. The owner decided (2026-10) to store cleaned judgment text in `case_texts` (`STORE_TEXT=true`; an email to IK is pending). Switch back with STORE_TEXT=false (live fetch only) and `drop table case_texts`. Text is served through `CaseTextStore`; never expose bulk text dumps.

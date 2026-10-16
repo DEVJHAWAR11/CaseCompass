@@ -69,8 +69,8 @@ export async function searchCases(
   mode: Mode,
   onSlow?: () => void,
 ): Promise<SearchResponse> {
-  // Free hosting sleeps when idle: if no answer after 4s, tell the UI it is waking up.
-  const slow = setTimeout(() => onSlow?.(), 4000);
+  // Free hosting sleeps when idle: if no answer after 10s, tell the UI it is waking up.
+  const slow = setTimeout(() => onSlow?.(), 10000);
   try {
     const res = await fetch(`${API_URL}/search`, {
       method: "POST",

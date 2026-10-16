@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-NoProfile", "-Command", "cd backend; $env:PYTHONPATH='.'; .venv/Scripts/python -m uvicorn app.api.main:app --port 8000"],
+      "port": 8000
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "powershell",
+      "runtimeArgs": ["-NoProfile", "-Command", "cd frontend; npm.cmd run dev -- -p 3000"],
+      "port": 3000
+    }
+  ]
+}

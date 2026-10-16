@@ -104,8 +104,8 @@ export default function SearchPage() {
           </div>
         </div>
         {waking && (
-          <p className="mt-3 font-ui text-sm text-terracotta">
-            The server is waking up after being idle. The first search can take up to a minute.
+          <p className="mt-3 font-ui text-sm text-ink-soft">
+            Still working… the server is starting up, this can take up to a minute.
           </p>
         )}
         {error && (
@@ -117,13 +117,6 @@ export default function SearchPage() {
 
       {results && (
         <section className="mt-12" aria-label="Results">
-          {/* The one place the logo appears: right above results that show IK content. */}
-          <div className="mb-6 flex flex-wrap items-center gap-4 rounded-md border border-brass/50 bg-parchment-deep/60 p-3">
-            <IKanoonLogo />
-            <p className="font-ui text-xs text-ink-soft">
-              Judgments and citations come from Indian Kanoon. Not endorsed by Indian Kanoon.
-            </p>
-          </div>
           <div className={`grid gap-8 ${shown.length > 1 ? "lg:grid-cols-3" : "mx-auto max-w-3xl"}`}>
             {shown.map((m) => {
               const r = results[m]!;
@@ -134,12 +127,12 @@ export default function SearchPage() {
                       {VIEWS.find((v) => v.id === m)?.label}
                     </h2>
                   )}
-                  <p className="mb-3 rounded-lg border border-brass/40 bg-parchment-deep/50 p-4 font-display text-lg leading-snug">{r.summary}</p>
+                  <p className="mb-3 rounded-lg border border-brass/40 bg-parchment-deep/50 p-4 font-body text-lg font-semibold leading-relaxed">{r.summary}</p>
                   {r.notices.map((n) => (
                     <p key={n} className="mb-2 font-ui text-xs text-terracotta">Note: {n}</p>
                   ))}
                   {r.rewritten_queries.length > 0 && (
-                    <p className="mb-4 font-ui text-xs text-ink-soft">We also searched for: {r.rewritten_queries.join(" · ")}</p>
+                    <p className="mb-4 font-ui text-sm text-ink-soft">We also searched for: {r.rewritten_queries.join(" · ")}</p>
                   )}
                   <div className="space-y-4">
                     {r.cases.map((c) => (
@@ -165,6 +158,15 @@ export default function SearchPage() {
 
       <footer className="mt-16 space-y-4">
         <BrassDivider />
+        {/* Logo sits at the very end, below the results (owner decision), unaltered. */}
+        {results && (
+          <div className="flex flex-wrap items-center gap-4 rounded-md border border-brass/50 bg-parchment-deep/60 p-3">
+            <IKanoonLogo />
+            <p className="font-ui text-xs text-ink-soft">
+              Judgments and citations come from Indian Kanoon. Not endorsed by Indian Kanoon.
+            </p>
+          </div>
+        )}
         <Disclaimer />
       </footer>
       <WhyDrawer c={why} onClose={() => setWhy(null)} />
