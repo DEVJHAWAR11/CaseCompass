@@ -13,6 +13,7 @@ import psycopg
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.config import settings
+from app.db import connect
 from app.extraction.extract import (
     EXTRACTION_VERSION,
     FACTS_CHARS,
@@ -23,6 +24,16 @@ from app.extraction.extract import (
 from app.ikanoon.client import IKClient
 from app.llm.provider import GroqProvider, LLMBudgetExceeded
 from app.textstore import IKTextStore
+
+
+def save(conn, sql, params):
+    """Run one update; if the pooler dropped the connection, reconnect once and retry."""
+    try:
+        conn.execute(sql, params)
+    except psycopg.OperationalError:
+        conn = connect()
+        conn.execute(sql, params)
+    return conn
 
 
 async def main(run: bool, limit: int):
@@ -45,7 +56,7 @@ async def main(run: bool, limit: int):
             if obj is None:  # both models failed validation: leave for retry, don't guess
                 print("  validation failed twice for", tid)
                 continue
-            conn.execute(
+            conn = save(conn,
                 """update cases set result=%s, refund_inr=%s, compensation_inr=%s, laws_cited=%s,
                    summary=%s, category=%s, extracted_by=%s, extraction_version=%s, extracted_at=now()
                    where tid=%s""",

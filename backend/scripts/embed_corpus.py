@@ -29,7 +29,7 @@ async def main(run: bool, limit: int):
     conn = psycopg.connect(settings.database_url, autocommit=True)
     cases = conn.execute(
         """select tid,title,court,extract(year from decided_on)::int,category from cases
-           where status='ingested' and not exists (select 1 from chunks where chunks.tid=cases.tid)
+           where status='ingested' and extracted_at is not null and not exists (select 1 from chunks where chunks.tid=cases.tid)
            order by tid limit %s""", (limit,)).fetchall()
     plan, total = [], 0
     for tid, title, court, year, cat in cases:
