@@ -21,7 +21,7 @@ story -> rewrite into <=3 legal queries (1 LLM call)
 offline: ingest -> clean text -> chunk + embed (Jina) -> outcome extraction (Groq) -> rule checks
 ```
 
-- **Data:** 424 consumer-commission cases searchable (about 200 airline/travel plus insurance, medical, property, banking, goods, education, telecom and more; more are being added as extraction finishes), 1,528 chunks, a citation graph
+- **Data:** 614 consumer-commission cases searchable (about 210 airline/travel plus insurance, medical, property, banking, goods, education, telecom and more; more are being added as extraction finishes), 2,213 chunks, a citation graph
   (plain tables + networkx). Judgment text is cleaned and stored in Postgres, so search and passages
   need no live source calls.
 - **Stack:** FastAPI + Pydantic, Supabase Postgres (pgvector + tsvector), Jina embeddings
@@ -30,7 +30,7 @@ offline: ingest -> clean text -> chunk + embed (Jina) -> outcome extraction (Gro
 - **Cost controls:** per-IP rate limit, hard cap on LLM calls per request, daily token budget,
   usage ledger, Jina quota tracking with keyword-only fallback.
 
-## Eval (27 airline stories, 424-case corpus)
+## Eval (27 airline stories, 614-case corpus (eval numbers below were measured on the earlier 424-case version))
 
 Relevance labels are coarse and rule-based (dispute-type tags), not hand-checked. Full tables and
 ablations are in [`eval/results.md`](eval/results.md).

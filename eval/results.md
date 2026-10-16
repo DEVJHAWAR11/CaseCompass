@@ -24,7 +24,7 @@ Eval over 27 stories (relevance labels: see docs/eval.md).
 | hybrid + rewriting, late chunking | 0.21 | 1.00 | 0.70 | 0.94 | 0.68 |
 | rewriting via HyDE instead | 0.18 | 0.93 | 0.67 | 0.87 | 0.63 |
 
-## Notes (corpus: 424 searchable cases across nine categories; the airline eval searches only the airline_travel category)
+## Notes (corpus: 614 searchable cases across nine categories (multi-category numbers below were measured on the earlier 424); the airline eval searches only the airline_travel category)
 - Re-run after adding about 220 cases from other categories and travel extras: shipped default (hybrid + rewriting, late-chunking vectors) hit@5 1.00, P@5 0.70, MRR 0.94, nDCG 0.68, versus 1.00 / 0.72 / 0.90 / 0.69 on the earlier 204-case corpus. Flat within noise. New airline/travel cases found by the extra queries have no hand labels, so they count as irrelevant here and push precision down slightly.
 - Reranking on text built from our own derived fields is still worse than plain hybrid (nDCG 0.59 vs 0.63); on the real matched passage it is about equal (0.66). It stays off (`RERANK_ENABLED=false`).
 - Citation-graph expansion still lowers nDCG (0.58), so related cases are shown separately.
