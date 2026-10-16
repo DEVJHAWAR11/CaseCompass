@@ -49,8 +49,9 @@ is off by default; graph expansion lowered nDCG, so it is shown separately as "r
 chunking, combined with rewriting, was better on every metric and is the shipped default. Outcome labels were checked by Claude (not a human) against the end of each judgment. On a fresh,
 random 50-case sample (35 judgeable) the AI label was right 71% of the time (95% interval 55-84%),
 measured before the last rule fix. The main error is the model answering "unclear" when the airline's
-appeal was dismissed (the award stands); a code rule now fixes most of these, which lifted the same
-samples to 77-81%, but that number is in-sample. Amounts are less reliable than outcomes. Details:
+appeal was dismissed (the award stands); a code rule now fixes most of these. A third random sample, labelled blind after the rules were
+frozen, gave 21 of 27 judgeable cases right = 78% (95% interval 59-89%), the clean post-fix figure; three of the six misses are
+borderline allowed vs partly-allowed calls. Amounts are less reliable than outcomes (3 of 6 verified compensation figures right). Details:
 `eval/review_results*.md`.
 
 ## Run locally
