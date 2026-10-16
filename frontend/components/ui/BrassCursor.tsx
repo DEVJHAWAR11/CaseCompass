@@ -27,9 +27,9 @@ export function BrassCursor() {
     };
     const leave = () => { x = y = -100; };
     const loop = () => {
-      rx += (x - rx) * 0.2;
-      ry += (y - ry) * 0.2;
-      scale += (target - scale) * 0.18;
+      rx += (x - rx) * 0.45;
+      ry += (y - ry) * 0.45;
+      scale += (target - scale) * 0.3;
       r.style.transform = `translate3d(${rx - 14}px, ${ry - 14}px, 0) scale(${scale})`;
       d.style.transform = `translate3d(${x - 2}px, ${y - 2}px, 0)`;
       raf = requestAnimationFrame(loop);
