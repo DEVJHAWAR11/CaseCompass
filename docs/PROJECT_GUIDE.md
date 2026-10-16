@@ -23,7 +23,7 @@ every AI-produced field is labelled "AI-generated".
 Why it exists: it is a portfolio project about **advanced retrieval-augmented generation (RAG)**. The
 retrieval pipeline and honest evaluation matter more than the interface.
 
-First category: airline and travel refunds. The code is organised so other categories can be added.
+It started with airline and travel refunds. A later round added insurance, builders and property, medical negligence, banking, defective goods and vehicles, education, telecom and utilities and online shopping, each tagged by the extraction step.
 
 ## 2. The plain-English idea of the pipeline
 
@@ -54,27 +54,32 @@ Offline side: ingest from Indian Kanoon -> clean and store text -> structural ch
 ## 3. Data
 
 - Source: the Indian Kanoon (IK) API. Auth is a token header. Costs: search 0.50 INR, document 0.20 INR,
-  fragment 0.05, metainfo 0.02. 500 INR free credit. Every response is cached on disk.
+  fragment 0.05, metainfo 0.02. Every response is cached on disk.
 - Discovery: keyword searches with the `doctypes=consumer` filter, then code drops obvious noise (not a consumer
-  commission, off-topic by title regex) before paying for documents.
-- Rounds: round 1, 152 ingested; round 2 (12 narrower queries), +73. A review then found 21 cases sharing one
-  identical final order across connected appeals, marked as duplicates (reversible). **Final: 204 ingested cases,
-  185 in the airline/travel label set**, 802 chunks, 851+ citation edges (sparse: few corpus cases cite each other).
-- IK spend: **80.6 INR of 500**. The production backend has `IK_SPEND_CAP_INR=0`, so the live app never pays IK.
-- Storage decision: IK's terms are silent on storing text. The owner chose to store cleaned judgment text in
-  Postgres (`STORE_TEXT=true`) and emailed IK. Fully reversible (`STORE_TEXT=false`, `drop table case_texts`).
-  It makes the app independent of live IK calls and makes re-extraction free.
-- Coverage by dispute type (eval label set): cancel/refund 20, denied boarding 16, baggage 47, delay 22,
-  agent/package 58. Cancel/refund and denied boarding are thin; this is the main data weakness.
-- Other sources considered and why not: e-Jagriti (official; CAPTCHA, no judgment-text search, automated
-  collection would mean bypassing the CAPTCHA, which we will not do); AWS open data (wrong court level);
-  research corpora (not confirmed public); commercial APIs (vendor claims unverified).
+  commission, off-topic by title regex for the travel rounds) before paying for documents.
+- Rounds: 152 (round 1), +73 (travel narrower queries), then a diversification round: 70 searches over nine categories
+  found 392 candidates and ingested 441 (fetch is balanced round-robin across categories). Duplicate orders found by review
+  (same final order across connected appeals) are marked, not deleted. Final: about 628 ingested, **614 searchable** at the last
+  count (a few dozen waiting for extraction), 2,213 chunks, 6,821 citation edges.
+- Category mix of the searchable cases (AI-assigned): airline_travel 213, other 69, insurance 65, real_estate 54,
+  goods_vehicles 50, medical 50, banking_finance 46, telecom_utilities 24, education 18, ecommerce 4.
+  Online shopping stayed tiny because Indian Kanoon returned very few consumer-commission candidates for it.
+- IK spend: about **204 INR** in total (80.6 before, 123.4 in the diversification round). The production backend has
+  `IK_SPEND_CAP_INR=0`, so the live app never pays IK; the local cap was raised to 400 INR for the batch.
+- Storage decision: IK's terms are silent on storing text. The owner chose to store cleaned judgment text in Postgres
+  (`STORE_TEXT=true`) and emailed IK. Reversible (`STORE_TEXT=false`, `drop table case_texts`).
+- Other sources considered and why not: e-Jagriti (CAPTCHA, no judgment-text search; automated collection would mean
+  bypassing the CAPTCHA, which we will not do); AWS open data (wrong court level); research corpora (not confirmed public);
+  commercial APIs (vendor claims unverified).
+- Operational notes from the batch: Groq's free tier allows about 200K tokens a day per model, so extraction of ~430 cases
+  stalled repeatedly; the 120b model crawled after its quota, the 20b model was used for the rest, and a second key from the
+  owner gave a fresh quota. The extraction script now reconnects when Supabase's pooler drops the connection (it crashed once).
 
 ## 4. Chunking and embeddings
 
 - Most judgments are plain text with no structure tags, so chunking uses heading regexes plus positional
-  fallbacks (last 15% = order). Chunks are typed: facts, issues, order. Max ~450 tokens each; 802 chunks
-  (~3.6 per case). Rows store offsets, vectors and a tsvector, not the text; text lives in `case_texts`.
+  fallbacks (last 15% = order). Chunks are typed: facts, issues, order. Max ~450 tokens each; 802 chunks in the first 225 cases
+  (~3.6 per case; 2,213 chunks for the 614 cases now searchable). Rows store offsets, vectors and a tsvector, not the text; text lives in `case_texts`.
 - Embeddings: `jina-embeddings-v3`, 1024 dimensions, 8192-token window, task types `retrieval.query` for
   the user's query and `retrieval.passage` for the corpus (using the right pair matters). The model name and
   dimension are stored in the database and config.
@@ -104,6 +109,8 @@ Offline side: ingest from Indian Kanoon -> clean and store text -> structural ch
   5. 11 of 185 summaries only said "details missing"; these are now dropped at serve time and the card shows the outcome and link instead.
 
 ## 6. Evaluation
+
+> Numbers in the first tables were measured on the 204-case airline corpus; the last bullets give the re-run on 424 cases and the multi-category check.
 
 ### Retrieval (27 scored stories, 204 cases)
 
@@ -144,6 +151,12 @@ failure is "who appealed" (model says unclear or dismissed when the airline's ap
 compensation matched 3 of 6 verified cases in sample 3 (two misses were Rs 5,000 off because the model added costs;
 a definition problem) and 6 of 9 in sample 2. Caveat that matters: the reviewer is a model reading the last 900
 characters, so it is a strong sanity check, not ground truth; a lawyer-reviewed sample would be the real test.
+
+### After the diversification round
+- Airline eval re-run on the 424-case corpus: shipped pipeline hit@5 1.00, P@5 0.70, MRR 0.94, nDCG 0.68 (was 1.00 / 0.72 / 0.90 / 0.69): flat within noise.
+- Multi-category check (`eval/run_multi.py`, 16 stories over eight non-travel categories): the expected AI-assigned category was in 70 of 80
+  top-5 results (88%), at least one right in 16 of 16 stories, top-1 right in 15 of 16. Weaker: education and telecom 7/10, online shopping 1/5 (only 2-4 cases).
+- Extraction prompt v3 (adds a PARTIES header and a category field): on 40 hand-labelled cases the raw model got 75% right (v2 raw was about 71%): no clear gain. Category tagging worked.
 
 ## 7. The application
 
@@ -192,23 +205,25 @@ characters, so it is a strong sanity check, not ground truth; a lawyer-reviewed 
 
 ## 10. Limitations, stated plainly
 
-1. Small corpus (204 cases) for a field with thousands of decisions; cancel/refund and denied boarding are thin.
-2. Outcome labels are about 71-78% accurate by a model reviewer; amounts are worse. Treat them as hints, read the order and the judgment.
-3. Eval labels are coarse, rule-based and not human-checked; 27 stories is small.
+1. A small collection (about 600 cases) for a field with thousands of decisions; online shopping, education and telecom are thin.
+2. Outcome labels are about 71-78% accurate by a model reviewer; amounts are worse. "Who appealed" is the recurring error and
+   neither a header-aware prompt (75% vs 71% on 40 cases) nor two title/header code rules fixed it.
+3. Eval labels are coarse, rule-based and not human-checked; 27 airline stories is small. The category check (16 stories) uses
+   AI-assigned categories.
 4. No human or lawyer review anywhere in the loop.
-5. Free-tier hosting: cold starts, in-memory rate limiter (fine for one instance only), 750-hour monthly cap.
+5. Free-tier hosting: cold starts (the site pings /health on load and an external monitor is configured by the owner), an
+   in-memory rate limiter (fine for one instance), and a 750-hour monthly cap.
 6. Mobile performance is mediocre by design choice of the animated landing page.
-7. IK text storage rests on the owner's decision while the terms are silent and IK's reply is pending.
+7. IK text storage rests on the owner's decision while the terms are silent; the logo sits at the end of the results page
+   (owner decision), although IK's terms say above the results.
 
 ## 11. What I would do next
 
-1. Add the external uptime monitor (the owner's sign-up).
-2. A lawyer-reviewed or at least multi-reviewer label sample; fix "who appealed" with a structured parse of the case header (appellant vs respondent), not just order text.
-3. More coverage, once IK's non-commercial monthly credit is confirmed: 200-300 cases targeted at cancel/refund and denied boarding. Print the estimate first.
-4. Human-judged relevance for the eval (graded 0-2), which would also test whether reranking helps on better labels.
-5. Shared rate limiter (Redis) and connection pooling if more than one instance is ever run; scheduled ingestion jobs.
-6. Fewer animated sections on phones for the Lighthouse score.
-7. Choose a LICENSE and an architecture diagram for the README.
+1. A lawyer-reviewed or multi-reviewer label sample; a structured parse of the case header for who appealed.
+2. More coverage once IK's non-commercial credit is confirmed, aimed at the thin categories; print the estimate first.
+3. Human-judged graded relevance for the eval, which would also test whether reranking helps on better labels.
+4. Shared rate limiter (Redis) and connection pooling if more than one instance is ever run; scheduled ingestion jobs.
+5. Fewer animated sections on phones for the Lighthouse score.
 
 ## 12. How to run it
 
