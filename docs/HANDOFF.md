@@ -1,72 +1,49 @@
-# Handoff: start a new session from here
+# Handoff: start a new session from here (updated 2026-10-16)
 
 Read this first, then `CLAUDE.md` (rules), `PROGRESS.md` (status), and `docs/guide-notes.md`
-(every number and decision; the user wants a detailed final project guide from it).
+(every number and decision; the user wants a detailed final project guide built from it).
 Do not open `data/`, cache folders or lock files. Keys live only in `.env` (gitignored): never print them.
 
 ## What CaseCompass is
 Indian consumer-court case finder (airline/travel disputes). A person describes a problem in plain
-words; the app finds similar NCDRC/state commission cases, shows outcomes (AI-extracted) with
-links to the judgments. Never says "you will win". Portfolio/learning project: retrieval pipeline
-and honest eval matter more than polish. Windows machine; repo at `C:\Users\KIIT0001\Desktop\consumer_court`.
+words; the app finds similar NCDRC/state commission cases and shows how they were decided (AI-extracted
+outcome, amounts, law cited) with the verbatim final-order sentence and a link to the judgment. It never
+says "you will win". Portfolio project: retrieval quality and honest eval numbers matter more than polish.
+Windows machine. Repo: `C:\Users\KIIT0001\Desktop\consumer_court`, GitHub `DEVJHAWAR11/CaseCompass`
+(branch `main`, public, everything pushed). Commits: one plain human line, no prefixes, no AI mention.
 
-## Where everything is
-- `backend/` FastAPI app (`app/api/main.py`), pipeline (`app/retrieval/`), IK client (`app/ikanoon/`),
-  Jina embeddings/rerank (`app/embeddings`, `app/rerank`), Groq LLM + cascade (`app/llm/`),
-  extraction (`app/extraction/`), citation graph (`app/graph/`), text store (`app/textstore.py`),
-  scripts (`backend/scripts/`: ingest, embed_corpus, extract_outcomes, apply_rules, backfill_text, migrate),
-  SQL migrations 001-004 (`backend/migrations/`), tests (`backend/tests/`, 8 pass).
-- `frontend/` Next.js 16 + Tailwind 4 + GSAP + Lenis. `/` illustrated landing page, `/search` the tool, `/about`.
-- `eval/` stories, labels, variants, `run_eval.py`, `results.md`.
-- `docs/` `guide-notes.md`, `eval.md`, `ikanoon-email.md`, this file.
-- Run backend (from `backend/`): `PYTHONPATH=. .venv/Scripts/python -m uvicorn app.api.main:app --port 8000`
-  Run frontend (from `frontend/`): `npm run dev`. Open http://localhost:3000 (add `?motion=force` if the OS has reduced motion on).
-- Python env: `backend/.venv` (uv). Tests: `.venv/Scripts/python -m pytest -q`. Lint: `ruff check`.
+## It is LIVE
+- Backend (Render free, Docker): https://casecompass-qw3v.onrender.com  (`/health`, `/search`, `/passage/{tid}`, `/case/{tid}` metadata only, `/usage`). Service id `srv-db8ff5rl550s738vcs20`. Auto-deploys on push to main (~3-4 min).
+- Frontend (Vercel Hobby, root dir `frontend`): https://case-compass-zeta.vercel.app (project `case-compass`, team `case-compass1`). NOT `case-compass.vercel.app` (someone else's).
+- The user is signed in to Render, Vercel and GitHub in the built-in browser. Never create accounts, enter passwords, or type API keys/DB URLs into any form: the user does that. Render env vars: DATABASE_URL, GROQ_API_KEY, JINA_API_KEY, IK_API_TOKEN (user-entered) plus CORS_ORIGINS, IK_SPEND_CAP_INR=0, LLM_SMALL_MODEL=openai/gpt-oss-120b, LLM_MIN_INTERVAL_S=3. Render's env form needs real typing, not programmatic fill. See `docs/DEPLOY.md` for the gotchas.
+- CI (`.github/workflows/ci.yml`): ruff + pytest (backend), eslint + next build (frontend). Green. 30 tests, 10 are DB/Jina integration tests that skip without DATABASE_URL.
 
-## State (all committed locally, nothing pushed)
-Phases 1-8 done. Phase 9 (deployment + README) not started.
-- Data: 152 ingested cases (139 airline/travel), 548 chunks (2 vectors each: standard + late chunking),
-  851 citation edges, `case_texts` 152 rows (2.8 M chars). DB = Supabase Postgres (session pooler URL in `.env`).
-- Models: embeddings `jina-embeddings-v3` (1024 dims); reranker `jina-reranker-v2-base-multilingual` (OFF by default);
-  Groq `gpt-oss-20b` (small) / `gpt-oss-120b` (large). `.env` currently sets LLM_SMALL_MODEL=gpt-oss-120b and
-  LLM_MIN_INTERVAL_S=3 (use 12 for long extraction jobs).
-- Pipeline default ("full"): query rewrite (1 LLM call) + hybrid (vector + tsvector, RRF). No reranker, no IK calls during search.
-  Passage drawer: GET /passage/{tid}?start&end served from `case_texts`.
-- Eval (27 stories, coarse rule-based labels): hybrid+rewrite no rerank nDCG@10 0.70, MRR 0.93, hit@5 1.00;
-  plain hybrid 0.68; rerank on derived text 0.59 (worse); graph expansion lowers nDCG (shown separately as related cases).
-- Outcome labels: ~70% correct on my 50-case check before a rule fix; not re-measured. Amounts: refund on 17/139, compensation on 27/139.
-- Spend so far: IK 48.0 INR (500 free; code cap `ik_spend_cap_inr` = 100); Jina ~1M of 10M tokens; Groq free tier.
-- Lighthouse (local prod build): desktop 97-98; mobile 79-87 (target 90 not met; next fix = pre-cropped phone hero image).
+## Where things are
+- `backend/` FastAPI (`app/api/main.py`), pipeline `app/retrieval/` (search.py, pipeline.py), extraction `app/extraction/extract.py` (LLM extract + code rules: rule_override, op_appeal_dismissed, amounts_from_order, operative_order), `app/db/__init__.py` (connect with retry), text store `app/textstore.py`, scripts `backend/scripts/` (ingest, embed_corpus, extract_outcomes, apply_rules, dedupe_orders, make_review_sheet, migrate, backfill_text), migrations 001-006 tracked in `schema_migrations`.
+- `frontend/` Next.js 16 + Tailwind 4 + GSAP + Lenis: `/` landing, `/search` tool, `/about`. `components/ResultCard.tsx` is the result card.
+- `eval/` stories, labels, variants, `run_eval.py`, `results.md`, `score_review.py`, `review_results*.md`.
+- Run backend (from `backend/`): `PYTHONPATH=. .venv/Scripts/python -m uvicorn app.api.main:app --port 8000`; frontend (from `frontend/`): `npm run dev`; tests `.venv/Scripts/python -m pytest -q`; lint `ruff check`.
 
-## Decisions made by the user
-- Store judgment text in DB despite IK terms being silent (user has emailed IK; reversible: `STORE_TEXT=false` + `drop table case_texts`).
-- Keep "AI-generated" labels (IK terms + honesty); plan: make them small, lead cards with verbatim order sentences.
-- Backend host: Render (not Fly). Frontend: Vercel. No pushing to git until the user says so.
-- Commits: one plain human line, no prefixes, no AI mention.
-- User wants a thorough final guide later: keep `docs/guide-notes.md` current.
+## Current numbers
+- Data: 204 ingested cases (185 airline/travel) after removing 21 duplicate orders (`dedupe_orders.py`, reversible); 802 chunks, two vectors each (standard + late chunking); case_texts in Postgres (`STORE_TEXT=true`, reversible). Dispute-type coverage in the eval label set: cancel/refund 20, denied boarding 16, baggage 47, delay 22, agent/package 58.
+- Shipped retrieval: query rewrite (1 LLM call) + hybrid dense/keyword RRF on LATE-CHUNKING vectors (`USE_LATE_CHUNKING=true`), no reranker, no graph merge. Eval (27 stories): hit@5 1.00, P@5 0.72, MRR 0.90, nDCG@10 0.69. Reranking on derived text and graph expansion did not help (reported honestly in README/eval).
+- Label accuracy (reviewed by Claude, not a human): fresh blind sample 71% (95% CI 55-84, n=35); after the op_appeal_dismissed rule 77-81% but IN-SAMPLE. Main error: model says "unclear" when the airline's appeal was dismissed. Compensation amounts weaker (6/9 right where truth known). A third fresh sample is needed for a clean post-fix number.
+- Spend: Indian Kanoon 80.6 INR used (500 free; local cap 200; production cap 0 so the live app never pays IK). Jina ~2.06M of 10M tokens. Groq free tier.
 
-## Pending / next steps (in order)
-1. **Security hardening (was interrupted, NOT done):** RLS is already ON for all 6 tables (migration 004). Still to run:
-   revoke `anon`/`authenticated` privileges on public tables; scan git history and working tree for leaked secrets
-   (patterns: `gsk_`, `jina_`, the IK token, DB password); confirm `.env` and `data/` are untracked.
-   The user pasted the DB password, IK token, Jina key and Groq key in chat: recommend rotating them.
-2. **Coverage is too thin** (150 cases; per dispute type roughly: cancel/refund 16, denied boarding 15, baggage 26, delay 23,
-   agent/package 45). Plan: raise `ik_spend_cap_inr` to ~200 and add targeted discovery queries (delay compensation, offloading,
-   lost/damaged baggage, travel-agent refund, tour/visa, hotel/online portal, cruise, covid cancellations, wheelchair/minor, excess baggage,
-   ticket not generated, air cargo); 3 pages each (~21 INR) + up to 300 doc fetches (~60 INR). Then: `backfill_text.py`, `embed_corpus.py`
-   (~0.7M Jina tokens), `extract_outcomes.py` (Groq: 8K tokens/min, 200K/day per model; run in background with LLM_MIN_INTERVAL_S=12),
-   `apply_rules.py`, `eval/make_labels.py`, re-run `eval/run_eval.py`. Show the batch estimate to the user first.
-   Also ask IK about the Rs 10,000/month non-commercial credit (email draft in `docs/ikanoon-email.md`, user says already mailed).
-3. **50-case accuracy review sheet** (order text next to the AI label) so a real accuracy figure can be published.
-4. Frontend: lead cards with the verbatim operative order sentence, shrink the AI label (keep it), pre-cropped mobile hero image.
-5. **Phase 9:** needs from user: official "Powered by IKanoon" logo at `frontend/public/ikanoon-logo.png`, Vercel + Render accounts.
-   README with architecture diagram, eval table, attribution. Backend free tier sleeps (UI already shows "waking up").
-6. Final project guide (user request): use `docs/guide-notes.md`, `eval/results.md`, `docs/eval.md`.
+## Rules that bite (also in CLAUDE.md)
+- Never say "you will win"; always show the disclaimer; AI outputs labelled AI-generated; stats computed in code.
+- IKanoon logo unaltered, shown ONCE in a highlighted box above search results (user decision); About keeps a text credit.
+- Before any batch run (ingest/embed/extract/eval) print estimate and get OK. The auto-mode classifier blocked a paid IK call once until the user explicitly said to run it: do not work around such blocks.
+- Do not push without the user saying so (the user has said "push" for the work done so far; ask again for new work if unsure). No key rotation needed (user decision: keys were never committed; history scanned clean).
+- Gotcha: backslash escapes written through the shell tool can arrive halved (`\b` becomes a backspace char, which silently breaks regexes). After writing regexes via heredocs, check for control characters.
+- Gotcha: Supabase pooler occasionally drops connections; use `app.db.connect()`; long evals can still crash (re-run and verify results.md actually changed).
+- Windows: kill background processes with PowerShell; scripts are Python.
 
-## Gotchas learned
-- Groq free tier limits are per model: 8,000 tokens/min AND 200,000 tokens/day. Throttle by tokens/min, not requests/min. qwen needs `reasoning_effort="none"` (already handled).
-- In bash tool commands, heredocs containing apostrophes/quotes sometimes break: write files with the Write tool instead.
-- On Windows kill background processes with PowerShell (`Get-CimInstance Win32_Process ... Stop-Process`); `pkill` does not exist.
-- Print UTF-8 with `PYTHONIOENCODING=utf-8`. `git` warns about CRLF: harmless.
-- e-Jagriti (official portal) has a CAPTCHA and only party-name search: do not scrape it. Open datasets (AWS Supreme/High Court, CC-BY-4.0) are the wrong court level.
-- IK pricing: search 0.50, document 0.20, original 0.50, fragment 0.05, metainfo 0.02. Terms silent on storage; attribution logo unaltered is mandatory.
+## Pending / ideas (user asked me to decide what matters; none is blocking)
+1. **Keep-alive does not work.** `.github/workflows/keepalive.yml` is registered and succeeds, but GitHub ran it only 4 times in ~17 hours (not every 14 min), so Render still sleeps (first request ~30 s; UI says "waking up"). Fix needs the USER to create a free external monitor (cron-job.org or UptimeRobot, 5-14 min, URL `https://casecompass-qw3v.onrender.com/health`); an account sign-up is something Claude cannot do. Then remove or keep the workflow.
+2. Mobile performance: local mobile Lighthouse median ~0.75 (live earlier 0.61); remaining cost is GSAP/ScrollTrigger script evaluation and style/layout. A real fix means less animation on phones (changes the look: ask the user).
+3. Third fresh 50-case blind review for an unbiased post-fix accuracy number; improve amount extraction.
+4. Coverage is still thin (see numbers). IK's Rs 10,000/month non-commercial credit: the user emailed IK, no reply known. More discovery would need a plan, estimate and the user's OK.
+5. Final detailed project guide (user request): build from `docs/guide-notes.md`, `eval/results.md`, `docs/eval.md`, `eval/review_results*.md`.
+6. Scalability notes (advice already given): shared rate limiter if >1 instance, pooling, scheduled jobs; sign-ins deliberately not needed (anonymous use, stories never stored).
+7. Smaller: choose a LICENSE; confirm the repo should stay public; README is current but could use an architecture image.
