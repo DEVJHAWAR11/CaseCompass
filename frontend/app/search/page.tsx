@@ -61,7 +61,7 @@ export default function SearchPage() {
         <p className="font-deva text-terracotta">अपनी बात लिखिए</p>
         <h1 className="mt-1 font-display text-[clamp(2.2rem,5vw,3.6rem)] leading-none tracking-tight">Describe what happened</h1>
         <p className="mx-auto mt-3 max-w-xl text-ink-soft">
-          Plain words are fine. We will show how consumer commissions decided similar airline and travel disputes.
+          Plain words are fine. We will show how consumer commissions decided similar consumer disputes: travel, insurance, builders, banks, hospitals, online shopping and more.
         </p>
       </header>
 

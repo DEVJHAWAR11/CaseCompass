@@ -27,7 +27,7 @@ const hind = Hind({ subsets: ["latin"], weight: ["400", "600"], variable: "--fon
 export const metadata: Metadata = {
   title: "CaseCompass — see how similar consumer cases turned out",
   description:
-    "Describe your airline or travel dispute in plain words and see how Indian consumer commissions decided similar cases, with links to the judgments.",
+    "Describe your consumer dispute (travel, insurance, builders, banks, online shopping and more) in plain words and see how Indian consumer commissions decided similar cases, with links to the judgments.",
 };
 
 export const viewport: Viewport = { themeColor: "#F6EAD0" };

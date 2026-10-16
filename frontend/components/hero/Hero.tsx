@@ -131,7 +131,7 @@ export function Hero() {
             ))}
           </h1>
           <p className="hero-sub mt-6 max-w-md text-lg leading-relaxed text-ink-soft">
-            Describe your airline or travel dispute in plain words. We find similar consumer-commission
+            Describe your consumer dispute in plain words. We find similar consumer-commission
             judgments and show who won, what was refunded, and the law they cited.
           </p>
           <div className="hero-cta mt-8 flex flex-wrap gap-3 font-ui">

@@ -29,7 +29,7 @@ export default function About() {
         by code from those labels.
       </p>
       <p>
-        This is a learning project covering airline and travel refund disputes only, with a small
+        This is a learning project. It started with airline and travel refund disputes and now also covers insurance, builders, banks, hospitals, online shopping and more, with a small
         collection of cases.
       </p>
       <Disclaimer />

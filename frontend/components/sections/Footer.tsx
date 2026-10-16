@@ -19,7 +19,7 @@ export function Footer() {
               <span className="font-display text-2xl">CaseCompass</span>
             </Link>
             <p className="mt-3 max-w-xs text-sm text-parchment/80">
-              See how Indian consumer commissions decided disputes like yours. A learning project covering airline and travel refunds.
+              See how Indian consumer commissions decided disputes like yours. A learning project covering travel, insurance, property, banking, medical, online shopping and more.
             </p>
           </div>
           <nav aria-label="Footer" className="font-ui text-sm">
