@@ -21,7 +21,7 @@ story -> rewrite into <=3 legal queries (1 LLM call)
 offline: ingest -> clean text -> chunk + embed (Jina) -> outcome extraction (Groq) -> rule checks
 ```
 
-- **Data:** 204 consumer-commission cases (about 185 airline/travel, after removing 21 duplicate orders), 802 chunks, a citation graph
+- **Data:** 424 consumer-commission cases searchable (about 200 airline/travel plus insurance, medical, property, banking, goods, education, telecom and more; more are being added as extraction finishes), 1,528 chunks, a citation graph
   (plain tables + networkx). Judgment text is cleaned and stored in Postgres, so search and passages
   need no live source calls.
 - **Stack:** FastAPI + Pydantic, Supabase Postgres (pgvector + tsvector), Jina embeddings
@@ -30,19 +30,23 @@ offline: ingest -> clean text -> chunk + embed (Jina) -> outcome extraction (Gro
 - **Cost controls:** per-IP rate limit, hard cap on LLM calls per request, daily token budget,
   usage ledger, Jina quota tracking with keyword-only fallback.
 
-## Eval (27 stories, 204 cases)
+## Eval (27 airline stories, 424-case corpus)
 
 Relevance labels are coarse and rule-based (dispute-type tags), not hand-checked. Full tables and
 ablations are in [`eval/results.md`](eval/results.md).
 
 | Pipeline | hit@5 | P@5 | MRR | nDCG@10 |
 |---|---|---|---|---|
-| naive vector search | 0.96 | 0.66 | 0.89 | 0.65 |
-| + hybrid (RRF) | 0.96 | 0.70 | 0.88 | 0.64 |
-| + Jina rerank (derived text) | 0.96 | 0.66 | 0.87 | 0.61 |
-| + query rewriting (no rerank) | 0.96 | 0.67 | 0.93 | 0.64 |
-| + citation-graph expansion | 0.96 | 0.67 | 0.93 | 0.60 |
-| hybrid + rewriting + late chunking (shipped) | 1.00 | 0.72 | 0.90 | 0.69 |
+| naive vector search | 0.96 | 0.66 | 0.87 | 0.65 |
+| + hybrid (RRF) | 0.96 | 0.67 | 0.89 | 0.63 |
+| + Jina rerank (derived text) | 0.96 | 0.65 | 0.87 | 0.59 |
+| + query rewriting (no rerank) | 0.96 | 0.66 | 0.91 | 0.62 |
+| + citation-graph expansion | 0.96 | 0.66 | 0.91 | 0.58 |
+| hybrid + rewriting + late chunking (shipped) | 1.00 | 0.70 | 0.94 | 0.68 |
+
+Other categories (insurance, medical, property, banking, goods, education, telecom, online shopping): a 16-story
+check found the right dispute type in 70 of 80 top-5 results (88%) and at least one right result in all 16 stories
+(`eval/results_multi.md`; categories are AI-assigned, not human-checked; online shopping has only 2 cases).
 
 What did not help, reported honestly: reranking on our derived text did not beat plain hybrid, so it
 is off by default; graph expansion lowered nDCG, so it is shown separately as "related cases". Late
