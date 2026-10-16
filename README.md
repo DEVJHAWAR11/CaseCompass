@@ -18,6 +18,32 @@ the honest evaluation numbers and the backend design matter more than the interf
 
 ---
 
+## Screenshots
+
+| Landing page | Search box |
+|---|---|
+| ![Landing page](docs/images/site-home.jpg) | ![Search page](docs/images/site-search.jpg) |
+
+![Results: computed summary line and result cards](docs/images/site-results.jpg)
+
+*Results page: a summary line computed in code, then one card per similar case with an AI-labelled outcome, the verbatim order sentence,
+the law cited and a link to the judgment. (Captured while query rewriting was temporarily unavailable: the app says so and still answers.)*
+
+## Tech stack
+
+| Layer | Tools |
+|---|---|
+| Frontend | Next.js 16 (App Router), React, TypeScript, Tailwind CSS 4, GSAP + Lenis (landing animation) |
+| Backend | Python, FastAPI, Pydantic, async httpx, uvicorn, networkx (citation graph) |
+| Database | Supabase Postgres, pgvector (HNSW cosine index), tsvector full-text (GIN) |
+| Embeddings | Jina `jina-embeddings-v3` (1024 dims, query/passage task types, late chunking) |
+| LLM | Groq-hosted `gpt-oss-20b` / `gpt-oss-120b` through the OpenAI SDK, behind a small `LLMProvider` interface |
+| Data source | Indian Kanoon API (disk-cached, spend-capped) |
+| Testing and CI | pytest, ruff, ESLint, `next build`, GitHub Actions |
+| Hosting | Vercel (frontend), Render free tier (backend, Docker), Supabase free tier (database) |
+
+---
+
 ## 1. RAG in plain words
 
 Imagine a very fast law-library assistant with three jobs.
