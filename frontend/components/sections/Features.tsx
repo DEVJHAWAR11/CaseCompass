@@ -9,8 +9,8 @@ const FEATURES = [
   { title: "Plain words in, legal matches out", body: "Your story is rewritten into the language judgments actually use, so “they kept my money” finds “deficiency in service, refund withheld”.", span: "md:col-span-4 md:row-span-2", big: true },
   { title: "Outcome at a glance", body: "Allowed, partly allowed, dismissed or unclear, with refund and compensation amounts where the order states them.", span: "md:col-span-2" },
   { title: "Every claim cited", body: "Each card links to the full judgment on Indian Kanoon. Read it yourself.", span: "md:col-span-2" },
-  { title: "Meaning + exact words", body: "Vector search finds paraphrases; full-text search catches section numbers and airline names. Results are fused by rank.", span: "md:col-span-3" },
-  { title: "Connected through citations", body: "Cases that rely on the same precedents surface as related reading, from a graph of 851 citation links.", span: "md:col-span-3" },
+  { title: "Meaning + exact words", body: "Vector search finds paraphrases; full-text search catches section numbers and company names. Results are fused by rank.", span: "md:col-span-3" },
+  { title: "Connected through citations", body: "Cases that rely on the same precedents surface as related reading, from a graph of 6,821 citation links.", span: "md:col-span-3" },
   { title: "Honest by design", body: "We never predict that you will win. When the AI cannot tell an outcome, it says “unclear” instead of guessing.", span: "md:col-span-6", wide: true },
 ];
 

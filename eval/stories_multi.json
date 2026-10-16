@@ -1,0 +1,18 @@
+[
+ {"cat":"insurance","story":"My health insurance company rejected my hospital claim saying the illness was pre-existing, but I told them everything when I bought the policy."},
+ {"cat":"insurance","story":"My car was damaged in an accident and the insurer refuses to pay the full claim, saying the repair estimate is too high."},
+ {"cat":"medical","story":"The doctor operated on my father and made a mistake during the surgery. He got an infection and the hospital refused to take responsibility."},
+ {"cat":"medical","story":"The hospital charged me far more than the estimate they gave and would not release the patient until I paid."},
+ {"cat":"real_estate","story":"I paid for a flat five years ago and the builder still has not given me possession. I want my money back with interest."},
+ {"cat":"real_estate","story":"The apartment I bought has a smaller carpet area than what the builder promised in the brochure."},
+ {"cat":"banking_finance","story":"Money was taken out of my account through my debit card in a transaction I never made, and the bank says it is not their fault."},
+ {"cat":"banking_finance","story":"The bank charged me a huge penalty when I closed my home loan early."},
+ {"cat":"goods_vehicles","story":"The new car I bought developed engine trouble within two months and the dealer will not replace it."},
+ {"cat":"goods_vehicles","story":"My washing machine stopped working within the warranty period and the company keeps delaying the repair."},
+ {"cat":"education","story":"I left the coaching institute after one month and they refuse to refund the course fees they took in advance."},
+ {"cat":"education","story":"The college collected the full fees but did not provide the course it promised during admission."},
+ {"cat":"telecom_utilities","story":"My electricity bill is many times higher than my normal usage and the department will not correct it."},
+ {"cat":"telecom_utilities","story":"My mobile company charged me for services I never used and does not fix the bill."},
+ {"cat":"ecommerce","story":"I ordered a phone online and received a different product. The seller refuses to return my money."},
+ {"cat":"airline_travel","story":"The railway ticket booking was cancelled but the refund never came to my account."}
+]

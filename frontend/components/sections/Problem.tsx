@@ -7,9 +7,9 @@ import { BrassDivider } from "@/components/ui/Ornaments";
 
 // Numbers are real counts from the project's first collection (see docs/guide-notes.md).
 const STATS = [
-  { to: 152, label: "consumer-commission judgments read" },
-  { to: 851, label: "citation links mapped between cases" },
-  { to: 548, label: "key passages indexed (facts, issues, orders)" },
+  { to: 424, label: "consumer-commission judgments read" },
+  { to: 6821, label: "citation links mapped between cases" },
+  { to: 1528, label: "key passages indexed (facts, issues, orders)" },
 ];
 
 function Roller({ className = "" }: { className?: string }) {
@@ -65,7 +65,7 @@ export function Problem() {
               </div>
             ))}
           </dl>
-          <p className="problem-line mt-6 font-ui text-xs text-ink-soft">Counts from our first collection: airline and travel disputes.</p>
+          <p className="problem-line mt-6 font-ui text-xs text-ink-soft">Counts from our current collection: travel, insurance, property, banking, medical and more.</p>
         </div>
         <Roller className="scroll-bottom" />
       </div>
