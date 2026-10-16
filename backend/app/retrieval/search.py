@@ -47,10 +47,17 @@ def rrf(*ranked_lists, k=RRF_K):
     return sorted(score, key=score.get, reverse=True)
 
 
-def to_cases(conn, chunk_ids: list[int], top=10, category: str | None = "airline_travel"):
+# None = search every category. The airline eval sets this to "airline_travel" so its labels stay valid.
+DEFAULT_CATEGORY: str | None = None
+_UNSET = object()
+
+
+def to_cases(conn, chunk_ids: list[int], top=10, category=_UNSET):
     """Collapse ordered chunk ids to ordered unique cases, remembering the best chunk each."""
     if not chunk_ids:
         return []
+    if category is _UNSET:
+        category = DEFAULT_CATEGORY
     rows = conn.execute(
         """select ch.id,ch.tid,ch.section,ch.char_start,ch.char_end from chunks ch
            join cases c on c.tid=ch.tid where ch.id = any(%s)

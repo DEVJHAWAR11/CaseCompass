@@ -28,13 +28,13 @@ async def main(run: bool, limit: int):
     emb = JinaEmbedder()
     conn = psycopg.connect(settings.database_url, autocommit=True)
     cases = conn.execute(
-        """select tid,title,court,extract(year from decided_on)::int from cases
+        """select tid,title,court,extract(year from decided_on)::int,category from cases
            where status='ingested' and not exists (select 1 from chunks where chunks.tid=cases.tid)
            order by tid limit %s""", (limit,)).fetchall()
     plan, total = [], 0
-    for tid, title, court, year in cases:
+    for tid, title, court, year, cat in cases:
         chunks = chunk_judgment(await store.get_text(tid))  # cached text: free
-        texts = [context_line(title, court, year, c.section) + c.text for c in chunks]
+        texts = [context_line(title, court, year, c.section, cat) + c.text for c in chunks]
         plan.append((tid, chunks, texts))
         total += sum(est_tokens(t) for t in texts)
     print(f"{len(plan)} cases, {sum(len(p[1]) for p in plan)} chunks")

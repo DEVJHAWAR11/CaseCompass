@@ -7,17 +7,19 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
 
-import psycopg  # noqa: E402
+import app.retrieval.search as _search_mod
+import psycopg
+from app.config import settings
+from app.embeddings.jina import JinaEmbedder
+from app.graph.citation_graph import expand, load_graph
+from app.ikanoon.client import IKClient
+from app.llm.provider import GroqProvider
+from app.llm.rewrite import rewrite_query
+from app.rerank.rerank import JinaReranker
+from app.retrieval.search import search
+from app.textstore import IKTextStore
 
-from app.config import settings  # noqa: E402
-from app.embeddings.jina import JinaEmbedder  # noqa: E402
-from app.graph.citation_graph import expand, load_graph  # noqa: E402
-from app.ikanoon.client import IKClient  # noqa: E402
-from app.llm.provider import GroqProvider  # noqa: E402
-from app.llm.rewrite import rewrite_query  # noqa: E402
-from app.rerank.rerank import JinaReranker  # noqa: E402
-from app.retrieval.search import search  # noqa: E402
-from app.textstore import IKTextStore  # noqa: E402
+_search_mod.DEFAULT_CATEGORY = "airline_travel"  # the eval labels cover airline cases only
 
 TOP = 10
 

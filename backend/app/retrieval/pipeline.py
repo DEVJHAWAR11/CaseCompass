@@ -91,7 +91,7 @@ def _enrich(conn: psycopg.Connection, hits: list[dict]) -> list[dict]:
     tids = [h["tid"] for h in hits]
     rows = {r[0]: r for r in conn.execute(
         """select tid,title,court,decided_on,result,refund_inr,compensation_inr,laws_cited,
-                  summary,source_url,num_citedby from cases where tid = any(%s)""", (tids,))}
+                  summary,source_url,num_citedby,category from cases where tid = any(%s)""", (tids,))}
     # Last ~2500 characters of each judgment, to quote the operative order verbatim (no model).
     tails = {t: x for t, x in conn.execute(
         "select tid, right(text, 2500) from case_texts where tid = any(%s)", (tids,))}
@@ -105,7 +105,7 @@ def _enrich(conn: psycopg.Connection, hits: list[dict]) -> list[dict]:
             "compensation_inr": float(r[6]) if r[6] is not None else None,
             "laws_cited": r[7] or [], "summary_ai": usable_summary(r[8]),
             "order_excerpt": operative_order(tails.get(r[0], "")), "source_url": r[9],
-            "cited_by_count": r[10], "matched_section": h["section"],
+            "cited_by_count": r[10], "category": r[11], "matched_section": h["section"],
             "match_start": h.get("start"), "match_end": h.get("end"),
             "score": h.get("score")})
     return out

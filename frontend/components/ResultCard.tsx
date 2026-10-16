@@ -7,6 +7,12 @@ const BADGE: Record<CaseHit["result"], { label: string; cls: string }> = {
   unclear: { label: "Outcome unclear", cls: "bg-parchment-deep text-ink" },
 };
 
+const CATEGORY: Record<string, string> = {
+  airline_travel: "Travel & airlines", insurance: "Insurance", banking_finance: "Banking & finance",
+  real_estate: "Builder & property", medical: "Medical", ecommerce: "Online shopping",
+  telecom_utilities: "Telecom & utilities", goods_vehicles: "Goods & vehicles", education: "Education",
+};
+
 const inr = (n: number | null) => (n == null ? null : `Rs ${Math.round(n).toLocaleString("en-IN")}`);
 
 // Drop a leading "D.O.D.: date" stamp and paragraph number that sometimes precede the order sentence.
@@ -27,6 +33,7 @@ export function ResultCard({ c, onWhy }: { c: CaseHit; onWhy?: (c: CaseHit) => v
         </span>
       </div>
       <p className="mt-1 font-ui text-sm text-ink-soft">
+        {c.category && CATEGORY[c.category] ? `${CATEGORY[c.category]} · ` : ""}
         {c.court}
         {c.decided_on ? ` · ${c.decided_on}` : ""}
       </p>

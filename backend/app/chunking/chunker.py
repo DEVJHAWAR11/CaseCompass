@@ -92,6 +92,15 @@ def chunk_judgment(text: str) -> list[Chunk]:
     return [Chunk(sec, i, s, e, text[s:e]) for i, (sec, s, e) in enumerate(chosen)]
 
 
-def context_line(title: str, court: str, year, section: str) -> str:
+_CATEGORY_LABEL = {
+    "airline_travel": "airline/travel refund dispute", "insurance": "insurance claim dispute",
+    "banking_finance": "bank/finance dispute", "real_estate": "builder/real estate dispute",
+    "medical": "medical negligence dispute", "ecommerce": "online shopping dispute",
+    "telecom_utilities": "telecom/utility billing dispute",
+    "goods_vehicles": "defective goods/vehicle dispute", "education": "education fees dispute"}
+
+
+def context_line(title: str, court: str, year, section: str, category: str | None = None) -> str:
     """Short header prepended before embedding so each chunk knows which case it came from."""
-    return f"{title} | {court} | {year or 'n.d.'} | airline/travel refund dispute | {section}\n"
+    label = _CATEGORY_LABEL.get(category or "airline_travel", "consumer dispute")
+    return f"{title} | {court} | {year or 'n.d.'} | {label} | {section}\n"

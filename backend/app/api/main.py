@@ -43,7 +43,7 @@ async def lifespan(app: FastAPI):
         emb=JinaEmbedder("query"), rr=JinaReranker(), llm=GroqProvider(), ik=ik,
         store=make_text_store(ik), graph=load_graph(conn),
         corpus={r[0] for r in conn.execute(
-            "select tid from cases where status='ingested' and category='airline_travel'")})
+            "select tid from cases where status='ingested'")})
     conn.close()
     app.state.hits = defaultdict(deque)
     yield

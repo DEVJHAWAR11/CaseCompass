@@ -13,7 +13,13 @@ import psycopg
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from app.config import settings
-from app.extraction.extract import EXTRACTION_VERSION, FACTS_CHARS, ORDER_CHARS, extract_case
+from app.extraction.extract import (
+    EXTRACTION_VERSION,
+    FACTS_CHARS,
+    ORDER_CHARS,
+    PARTIES_CHARS,
+    extract_case,
+)
 from app.ikanoon.client import IKClient
 from app.llm.provider import GroqProvider, LLMBudgetExceeded
 from app.textstore import IKTextStore
@@ -24,7 +30,7 @@ async def main(run: bool, limit: int):
     todo = [r[0] for r in conn.execute(
         "select tid from cases where status='ingested' and extracted_at is null "
         "order by tid limit %s", (limit,)).fetchall()]
-    per_in = (FACTS_CHARS + ORDER_CHARS) // 4 + 170  # excerpt + fixed prompt
+    per_in = (FACTS_CHARS + ORDER_CHARS + PARTIES_CHARS) // 4 + 260  # excerpt + fixed prompt
     print(f"{len(todo)} cases | ESTIMATE: {len(todo)} calls (small model first), "
           f"~{len(todo) * (per_in + 250):,} tokens (daily budget {settings.llm_daily_token_budget:,};"
           f" escalations add more). Groq free tier: no cash cost.")
@@ -44,7 +50,7 @@ async def main(run: bool, limit: int):
                    summary=%s, category=%s, extracted_by=%s, extraction_version=%s, extracted_at=now()
                    where tid=%s""",
                 (obj.r, obj.ref, obj.comp, json.dumps(laws), obj.s,
-                 "airline_travel" if obj.rel else "other", model, EXTRACTION_VERSION, tid))
+                 obj.cat, model, EXTRACTION_VERSION, tid))
             n += 1
             esc += escalated
             trunc += cut

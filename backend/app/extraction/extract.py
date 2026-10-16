@@ -15,19 +15,31 @@ from app.llm.cascade import run_cascade
 from app.llm.provider import LLMProvider
 
 # Bump when the prompt, trimming or rules change; stored per case so reruns can target old rows.
-EXTRACTION_VERSION = "v2"
+EXTRACTION_VERSION = "v3"
 FACTS_CHARS = 1200
 ORDER_CHARS = 2400
+PARTIES_CHARS = 420
+
+# Fixed category list: the model picks one, so the app can show and filter by dispute type.
+CATEGORIES = ["airline_travel", "insurance", "banking_finance", "real_estate", "medical",
+              "ecommerce", "telecom_utilities", "goods_vehicles", "education", "other"]
 
 SYSTEM = (
-    "You read an Indian consumer commission judgment excerpt (facts, then final order). "
+    "You read an Indian consumer commission judgment excerpt (parties, facts, then final order). "
     'Return JSON only: {"r":"allowed|partly_allowed|dismissed|unclear",'
     '"ref":<refund INR number or null>,"comp":<compensation+costs INR number or null>,'
-    '"rel":<true if about airline/air travel/travel agent/tour/ticket refund else false>,'
+    '"cat":"airline_travel|insurance|banking_finance|real_estate|medical|ecommerce|'
+    'telecom_utilities|goods_vehicles|education|other",'
     '"s":"<one factual sentence under 40 words>"}. '
-    "Judge the COMPLAINANT's position: complaint/award in the complainant's favour = allowed "
-    "(also when the opposite party's appeal is dismissed); opposite party's appeal allowed and "
-    "complaint dismissed = dismissed. "
+    "cat: airline_travel = airlines, flights, travel agents, tours, hotels, railway/bus tickets; "
+    "banking_finance = banks, cards, loans; real_estate = builders, flats, plots; "
+    "medical = hospitals, doctors; ecommerce = online orders; telecom_utilities = phone, internet, "
+    "electricity, gas; goods_vehicles = appliances, phones, cars, dealers. "
+    "Judge the COMPLAINANT's position. PARTIES shows who filed this appeal/revision: if the "
+    "APPELLANT/PETITIONER is the complainant (a consumer), dismissal of the appeal = dismissed and "
+    "allowing it = allowed; if the appellant is the opposite party (a company), dismissal of its "
+    "appeal = allowed (the complainant's award stands) and allowing it = dismissed. "
+    "No appeal and complaint allowed = allowed. "
     "Use null when an amount is not stated; use unclear when the outcome is not stated."
 )
 
@@ -36,8 +48,13 @@ class Extracted(BaseModel):
     r: str
     ref: float | None = None
     comp: float | None = None
-    rel: bool = True
+    cat: str = "other"
     s: str = Field(default="", max_length=400)
+
+    @field_validator("cat")
+    @classmethod
+    def _cat(cls, v):
+        return v if v in CATEGORIES else "other"  # unknown label: keep the case, tag it other
 
     @field_validator("r")
     @classmethod
@@ -71,13 +88,24 @@ def laws_cited(text: str, limit=8) -> list[str]:
     return out[:limit]
 
 
+def parties_snippet(text: str) -> str:
+    """Header text that names the appellant/petitioner and the respondent (who appealed?).
+    Plain regex on the first 3,000 characters; falls back to the very start of the text."""
+    head = re.sub(r"\s+", " ", text[:3000])
+    m = re.search(r"(Appellants?|Petitioners?|Revisionists?)\b", head, re.IGNORECASE)
+    if not m:
+        return head[:PARTIES_CHARS]
+    start = max(0, m.start() - 230)
+    return head[start:start + PARTIES_CHARS]
+
+
 def trim_for_llm(text: str) -> tuple[str, bool]:
     """Opening facts + final order only. Returns (excerpt, was_truncated)."""
     chunks = chunk_judgment(text)
     facts = next((c.text for c in chunks if c.section == "facts"), text[:FACTS_CHARS])
     order = "\n".join(c.text for c in chunks if c.section == "order") or text[-ORDER_CHARS:]
     cut = len(facts) > FACTS_CHARS or len(order) > ORDER_CHARS
-    return f"FACTS:\n{facts[:FACTS_CHARS]}\n\nORDER:\n{order[-ORDER_CHARS:]}", cut
+    return f"PARTIES:\n{parties_snippet(text)}\n\nFACTS:\n{facts[:FACTS_CHARS]}\n\nORDER:\n{order[-ORDER_CHARS:]}", cut
 
 
 def _amount_in_text(x: float | None, text: str) -> bool:

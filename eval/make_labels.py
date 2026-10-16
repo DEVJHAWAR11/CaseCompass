@@ -16,11 +16,10 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "backend"))
-import psycopg  # noqa: E402
-
-from app.config import settings  # noqa: E402
-from app.ikanoon.client import IKClient  # noqa: E402
-from app.textstore import IKTextStore  # noqa: E402
+import psycopg
+from app.config import settings
+from app.ikanoon.client import IKClient
+from app.textstore import IKTextStore
 
 AGENT = re.compile(r"travel|tour|trip|yatra|ibibo|goibibo|cox|thomas cook|holiday|cleartrip|"
                    r"flight raja|paytm|expedia|irctc|catering", re.IGNORECASE)

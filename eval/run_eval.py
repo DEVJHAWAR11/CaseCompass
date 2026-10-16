@@ -18,7 +18,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent))
-from variants import ABLATIONS, STAGES, Env  # noqa: E402
+from variants import ABLATIONS, STAGES, Env
 
 HERE = Path(__file__).parent
 

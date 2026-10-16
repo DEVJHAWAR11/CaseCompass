@@ -18,6 +18,8 @@ export interface CaseHit {
   order_excerpt: string | null;
   source_url: string;
   cited_by_count: number | null;
+  /** Dispute type the AI assigned (airline_travel, insurance, ...). */
+  category?: string | null;
   matched_section: string;
   match_start: number | null;
   match_end: number | null;
