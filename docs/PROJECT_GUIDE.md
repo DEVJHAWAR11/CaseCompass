@@ -59,10 +59,10 @@ Offline side: ingest from Indian Kanoon -> clean and store text -> structural ch
   commission, off-topic by title regex for the travel rounds) before paying for documents.
 - Rounds: 152 (round 1), +73 (travel narrower queries), then a diversification round: 70 searches over nine categories
   found 392 candidates and ingested 441 (fetch is balanced round-robin across categories). Duplicate orders found by review
-  (same final order across connected appeals) are marked, not deleted. Final: about 628 ingested, **614 searchable** at the last
-  count (a few dozen waiting for extraction), 2,213 chunks, 6,821 citation edges.
-- Category mix of the searchable cases (AI-assigned): airline_travel 213, other 69, insurance 65, real_estate 54,
-  goods_vehicles 50, medical 50, banking_finance 46, telecom_utilities 24, education 18, ecommerce 4.
+  (same final order across connected appeals) are marked, not deleted. Final: about 628 ingested, **627 searchable** at the last
+  count (one case still unextracted), 2,271 chunks, 6,821 citation edges.
+- Category mix of the searchable cases (AI-assigned): airline_travel 215, other 72, insurance 70, real_estate 58,
+  goods_vehicles 55, banking_finance 52, medical 52, telecom_utilities 27, education 21, ecommerce 5.
   Online shopping stayed tiny because Indian Kanoon returned very few consumer-commission candidates for it.
 - IK spend: about **204 INR** in total (80.6 before, 123.4 in the diversification round). The production backend has
   `IK_SPEND_CAP_INR=0`, so the live app never pays IK; the local cap was raised to 400 INR for the batch.

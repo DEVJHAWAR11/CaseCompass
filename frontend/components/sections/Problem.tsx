@@ -7,9 +7,9 @@ import { BrassDivider } from "@/components/ui/Ornaments";
 
 // Numbers are real counts from the project's first collection (see docs/guide-notes.md).
 const STATS = [
-  { to: 614, label: "consumer-commission judgments read" },
+  { to: 627, label: "consumer-commission judgments read" },
   { to: 6821, label: "citation links mapped between cases" },
-  { to: 2213, label: "key passages indexed (facts, issues, orders)" },
+  { to: 2271, label: "key passages indexed (facts, issues, orders)" },
 ];
 
 function Roller({ className = "" }: { className?: string }) {

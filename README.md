@@ -203,7 +203,7 @@ plus rewriting was best or equal on every metric and is the shipped default. Aft
 categories the airline numbers stayed flat (new airline cases have no hand labels, which pushes precision down slightly).
 
 **Other categories**: a 16-story check (insurance, medical, property, banking, goods, education, telecom, online shopping)
-found the expected dispute type in 70 of 80 top-5 results (88%) and at least one right result in all 16 stories.
+found the expected dispute type in 70 of 80 top-5 results (88%) and at least one right result in all 16 stories (re-measured on the full 627-case collection: same 88%).
 Categories are AI-assigned, not human-checked, and online shopping has only a handful of cases. Details: `eval/results_multi.md`.
 
 **Outcome-label accuracy** (checked by Claude against the end of each judgment, not by a human):
@@ -223,7 +223,7 @@ Everything is in `eval/` (stories, labels, `run_eval.py`, `run_multi.py`, review
 
 ## 6. Data
 
-About 600+ consumer-commission judgments (NCDRC and state commissions, plus a few Supreme Court matters) across ten
+627 consumer-commission judgments (NCDRC and state commissions, plus a few Supreme Court matters) across ten
 categories, with citation edges. Judgment text comes from [Indian Kanoon](https://indiankanoon.org) and is stored cleaned in
 Postgres; search and passages need no live source calls. The collection is small for the field. Coverage is thinnest for
 online shopping, education and telecom. Total Indian Kanoon spend so far is about 204 INR.

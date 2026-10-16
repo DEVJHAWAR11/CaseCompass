@@ -1,6 +1,6 @@
 # Handoff: start a new session from here (updated 2026-10-16, evening)
 
-LATEST: diversified to nine categories (614 searchable cases, 2,213 chunks, IK spend 204 INR, Jina ~3.5M tokens). README rewritten with diagrams, MIT LICENSE added, Advanced toggle hides the extra search modes, logo at the end of results. Still open: a few dozen cases unextracted/unembedded (run `scripts/extract_outcomes.py --run` then `scripts/embed_corpus.py --run` after Groq's daily quota resets; the owner's second Groq key is in local .env as GROQ_API_KEY, the old one as GROQ_API_KEY_PREV; local LLM_DAILY_TOKEN_BUDGET is 900000), then re-run `eval/run_eval.py` and `eval/run_multi.py`, and update counts in frontend/components/sections/Problem.tsx.
+LATEST: diversified to nine categories (627 searchable cases, 2,271 chunks, IK spend 204 INR, Jina ~3.5M tokens). README rewritten with diagrams, MIT LICENSE added, Advanced toggle hides the extra search modes, logo at the end of results. Still open: one case unextracted (the rest done; counts: 627 searchable cases, 2,271 chunks) (run `scripts/extract_outcomes.py --run` then `scripts/embed_corpus.py --run` after Groq's daily quota resets; the owner's second Groq key is in local .env as GROQ_API_KEY, the old one as GROQ_API_KEY_PREV; local LLM_DAILY_TOKEN_BUDGET is 900000), then re-run `eval/run_eval.py` and `eval/run_multi.py`, and update counts in frontend/components/sections/Problem.tsx.
 
 
 Read this first, then `CLAUDE.md` (rules), `PROGRESS.md` (status), and `docs/guide-notes.md`
