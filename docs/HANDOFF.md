@@ -40,10 +40,10 @@ Windows machine. Repo: `C:\Users\KIIT0001\Desktop\consumer_court`, GitHub `DEVJH
 - Windows: kill background processes with PowerShell; scripts are Python.
 
 ## Pending / ideas (user asked me to decide what matters; none is blocking)
-1. **Keep-alive does not work.** `.github/workflows/keepalive.yml` is registered and succeeds, but GitHub ran it only 4 times in ~17 hours (not every 14 min), so Render still sleeps (first request ~30 s; UI says "waking up"). Fix needs the USER to create a free external monitor (cron-job.org or UptimeRobot, 5-14 min, URL `https://casecompass-qw3v.onrender.com/health`); an account sign-up is something Claude cannot do. Then remove or keep the workflow.
+1. **Keep-alive: still needs the user's external monitor.** (Site now also pings /health on page open, 2026-10-16.) Original problem: `.github/workflows/keepalive.yml` is registered and succeeds, but GitHub ran it only 4 times in ~17 hours (not every 14 min), so Render still sleeps (first request ~30 s; UI says "waking up"). Fix needs the USER to create a free external monitor (cron-job.org or UptimeRobot, 5-14 min, URL `https://casecompass-qw3v.onrender.com/health`); an account sign-up is something Claude cannot do. Then remove or keep the workflow.
 2. Mobile performance: local mobile Lighthouse median ~0.75 (live earlier 0.61); remaining cost is GSAP/ScrollTrigger script evaluation and style/layout. A real fix means less animation on phones (changes the look: ask the user).
-3. Third fresh 50-case blind review for an unbiased post-fix accuracy number; improve amount extraction.
+3. DONE 2026-10-16: third blind review, 21/27 = 78% (59-89%), rules frozen (eval/review_results_fresh3.md). Still open: fix 'who appealed' by parsing the case header; amounts (compensation 3/6, model sometimes adds costs).
 4. Coverage is still thin (see numbers). IK's Rs 10,000/month non-commercial credit: the user emailed IK, no reply known. More discovery would need a plan, estimate and the user's OK.
-5. Final detailed project guide (user request): build from `docs/guide-notes.md`, `eval/results.md`, `docs/eval.md`, `eval/review_results*.md`.
+5. DONE: final guide is docs/PROJECT_GUIDE.md (built from `docs/guide-notes.md`, `eval/results.md`, `docs/eval.md`, `eval/review_results*.md`).
 6. Scalability notes (advice already given): shared rate limiter if >1 instance, pooling, scheduled jobs; sign-ins deliberately not needed (anonymous use, stories never stored).
 7. Smaller: choose a LICENSE; confirm the repo should stay public; README is current but could use an architecture image.

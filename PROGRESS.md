@@ -1,5 +1,7 @@
 # Progress
 
+Update 2026-10-16: warm-up ping added to the site; third blind review 78% (n=27); final guide at docs/PROJECT_GUIDE.md. Open: user's external uptime monitor, LICENSE choice, push of these commits.
+
 ## Current phase
 Keep-alive via GitHub Actions does NOT keep Render awake (runs only every few hours); user must add an external monitor. DEPLOYED 2026-10-15: backend https://casecompass-qw3v.onrender.com, frontend https://case-compass-zeta.vercel.app (see docs/DEPLOY.md). Phases 1-8 done, plus the illustrated landing page (/) with the search tool at /search. Coverage expanded to 225 cases, logo placed, deploy files written, README written (204 cases, eval re-run), late chunking default, review sheet + scorer, migration tracking, regression tests. Security hardening done (migration 005, secret scan clean). Next: Phase 9 deployment on Vercel + Render (user chose Render). Needs: official IKanoon logo file, Vercel and Render accounts.
 
